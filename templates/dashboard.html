@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <nav>
+
+        <h2>FocusFlow AI</h2>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/planner">Planner</a>
+            <a href="/timer">Timer</a>
+        </div>
+
+    </nav>
+
+    <div class="dashboard">
+
+        <h1>Dashboard</h1>
+
+        <div class="cards">
+
+            <div class="card">
+                <h2>Study Hours</h2>
+                <p>5.2 hrs</p>
+            </div>
+
+            <div class="card">
+                <h2>Focus Sessions</h2>
+                <p>8 Sessions</p>
+            </div>
+
+            <div class="card">
+                <h2>Productivity Score</h2>
+                <p>82%</p>
+            </div>
+
+            <div class="card">
+                <h2>Current Streak</h2>
+                <p>12 Days</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
