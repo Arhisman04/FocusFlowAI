@@ -8,13 +8,13 @@ load_dotenv()
 # Configure Gemini API
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Initialize model
-model = genai.GenerativeModel("gemini-1.5-flash")
+# Initialize Gemini model
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 
 def generate_plan(prompt):
     """
-    Generates AI response using Gemini API
+    Generates AI response using Gemini
     """
 
     try:
