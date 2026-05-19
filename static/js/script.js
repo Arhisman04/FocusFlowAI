@@ -1,37 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
+/* =========================
+   CHAT SYSTEM (FOCUSFLOW AI)
+========================= */
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer</title>
+function typeText(element, text, speed = 12) {
+    let i = 0;
+    element.innerHTML = "";
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+    function type() {
+        if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        }
+    }
 
-<body>
+    type();
+}
 
-    <div class="timer-container">
+function sendMessage() {
+    const input = document.getElementById("userInput");
+    const chatBox = document.getElementById("chatBox");
 
-        <h1>Focus Timer</h1>
+    if (!input || !chatBox) {
+        console.error("Chat elements not found");
+        return;
+    }
 
-        <div class="timer-display" id="timer">
-            25:00
-        </div>
+    const message = input.value.trim();
+    if (!message) return;
 
-        <div class="timer-buttons">
+    /* USER MESSAGE */
+    const userMsg = document.createElement("div");
+    userMsg.className = "msg user";
+    userMsg.innerText = message;
+    chatBox.appendChild(userMsg);
 
-            <button onclick="startTimer()">Start</button>
+    input.value = "";
 
-            <button onclick="pauseTimer()">Pause</button>
+    /* AI PLACEHOLDER */
+    const aiMsg = document.createElement("div");
+    aiMsg.className = "msg ai";
+    aiMsg.innerText = "Thinking...";
+    chatBox.appendChild(aiMsg);
 
-            <button onclick="resetTimer()">Reset</button>
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-        </div>
+    /* CALL BACKEND */
+    fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(res => res.json())
+    .then(data => {
+        typeText(aiMsg, data.response, 10);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    })
+    .catch(err => {
+        aiMsg.innerText = "Error: AI not responding";
+        console.error(err);
+    });
+}
 
-    </div>
+/* =========================
+   ENTER KEY SUPPORT
+========================= */
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("userInput");
 
-</body>
-</html>
+    if (!input) return;
+
+    input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
+});
+
+/* =========================
+   DEBUG HELP
+========================= */
+
+console.log("FocusFlow AI script loaded successfully 🚀");

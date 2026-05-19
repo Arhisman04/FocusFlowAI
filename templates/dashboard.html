@@ -2,57 +2,308 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+<meta charset="UTF-8">
+<title>FocusFlow AI Dashboard</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+/* =========================
+   PREMIUM BASE UI
+========================= */
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+    background: radial-gradient(circle at top, #0f172a, #070b14);
+    color: #e5e7eb;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 28px;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+}
+
+nav h2 {
+    color: #38bdf8;
+    font-weight: 700;
+}
+
+.container {
+    padding: 30px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    color: #9ca3af;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* =========================
+   STATS GRID
+========================= */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 16px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+}
+
+/* =========================
+   CHAT UI
+========================= */
+
+.chat-container {
+    margin-top: 35px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 18px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.chat-header {
+    font-weight: 600;
+    color: #38bdf8;
+    margin-bottom: 10px;
+}
+
+.chat-box {
+    height: 320px;
+    overflow-y: auto;
+    background: #0b1220;
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.msg {
+    padding: 10px 12px;
+    border-radius: 12px;
+    max-width: 80%;
+    font-size: 14px;
+}
+
+.user {
+    background: #1f2937;
+    align-self: flex-end;
+}
+
+.ai {
+    background: rgba(56,189,248,0.15);
+    border: 1px solid rgba(56,189,248,0.25);
+    align-self: flex-start;
+}
+
+.input-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: #111827;
+    color: white;
+    outline: none;
+}
+
+button {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    background: #38bdf8;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+canvas {
+    margin-top: 25px;
+    background: white;
+    border-radius: 14px;
+    padding: 10px;
+}
+</style>
+
 </head>
 
 <body>
 
-    <nav>
+<nav>
+    <h2>FocusFlow AI</h2>
+</nav>
 
-        <h2>FocusFlow AI</h2>
+<div class="container">
 
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/dashboard">Dashboard</a>
-            <a href="/planner">Planner</a>
-            <a href="/timer">Timer</a>
-        </div>
+<h1>📊 Productivity Dashboard</h1>
+<div class="subtitle">AI-powered focus intelligence system</div>
 
-    </nav>
+<!-- ================= STATS ================= -->
+<div class="grid">
 
-    <div class="dashboard">
+<div class="card"><h3>Sessions</h3><p>{{ total_sessions }}</p></div>
+<div class="card"><h3>Total Time</h3><p>{{ total_time }}</p></div>
+<div class="card"><h3>Avg Time</h3><p>{{ avg_time }}</p></div>
+<div class="card"><h3>Score</h3><p>{{ score }}/100</p></div>
+<div class="card"><h3>🔥 Streak</h3><p>{{ streak }}</p></div>
+<div class="card"><h3>⚡ XP</h3><p>{{ xp }}</p></div>
+<div class="card"><h3>🏆 Level</h3><p>{{ level }}</p></div>
 
-        <h1>Dashboard</h1>
+</div>
 
-        <div class="cards">
+<!-- ================= AI INSIGHT ================= -->
+<div class="chat-container">
+    <h2 class="chat-header">🤖 AI Insight</h2>
+    <div class="chat-box">{{ ai_insight | safe }}</div>
+</div>
 
-            <div class="card">
-                <h2>Study Hours</h2>
-                <p>5.2 hrs</p>
-            </div>
+<!-- ================= CHAT SYSTEM ================= -->
+<div class="chat-container">
 
-            <div class="card">
-                <h2>Focus Sessions</h2>
-                <p>8 Sessions</p>
-            </div>
+<div class="chat-header">💬 AI Chat Assistant</div>
 
-            <div class="card">
-                <h2>Productivity Score</h2>
-                <p>82%</p>
-            </div>
+<div id="chatBox" class="chat-box"></div>
 
-            <div class="card">
-                <h2>Current Streak</h2>
-                <p>12 Days</p>
-            </div>
+<div class="input-row">
+<input id="userInput" placeholder="Ask anything..." />
+<button onclick="sendMessage()">Send</button>
+</div>
 
-        </div>
+</div>
 
-    </div>
+<!-- ================= AI PLANNER ================= -->
+<div class="chat-container">
+
+<div class="chat-header">🧠 AI Study Planner</div>
+
+<div class="input-row">
+    <input id="planInput" placeholder="e.g. Physics exam in 5 days, weak in numericals..." />
+    <button onclick="generatePlan()">Generate Plan</button>
+</div>
+
+<div id="planOutput" class="chat-box"></div>
+
+</div>
+
+<!-- ================= CHART ================= -->
+<h2 style="margin-top:30px;">📈 Study Trend</h2>
+<canvas id="chart"></canvas>
+
+</div>
+
+<!-- ================= CHAT SCRIPT ================= -->
+<script>
+function sendMessage() {
+    const input = document.getElementById("userInput");
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const box = document.getElementById("chatBox");
+
+    box.innerHTML += `<div class="msg user">${msg}</div>`;
+    input.value = "";
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: msg})
+    })
+    .then(r => r.json())
+    .then(data => {
+
+        // FIX: backend returns "response"
+        box.innerHTML += `<div class="msg ai">${data.response}</div>`;
+        box.scrollTop = box.scrollHeight;
+    })
+    .catch(() => {
+        box.innerHTML += `<div class="msg ai">❌ AI error</div>`;
+    });
+}
+</script>
+
+<!-- ================= AI PLANNER SCRIPT ================= -->
+<script>
+function generatePlan() {
+
+    const input = document.getElementById("planInput").value.trim();
+    if (!input) return;
+
+    const box = document.getElementById("planOutput");
+
+    box.innerHTML = `<div class="msg ai">⏳ Generating AI plan...</div>`;
+
+    fetch("/generate-plan", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({input: input})
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.status === "error") {
+            box.innerHTML = `<div class="msg ai">❌ ${data.plan}</div>`;
+            return;
+        }
+
+        box.innerHTML = `<div class="msg ai">${data.plan}</div>`;
+    })
+    .catch(() => {
+        box.innerHTML = `<div class="msg ai">❌ Error generating plan</div>`;
+    });
+}
+</script>
+
+<!-- ================= CHART SCRIPT ================= -->
+<script>
+fetch("/api/sessions")
+.then(r => r.json())
+.then(data => {
+
+    if (!data || data.length === 0) return;
+
+    new Chart(document.getElementById("chart"), {
+        type: "line",
+        data: {
+            labels: data.map(d => d.date),
+            datasets: [{
+                label: "Study Time",
+                data: data.map(d => d.duration),
+                borderColor: "#38bdf8",
+                tension: 0.4
+            }]
+        }
+    });
+
+});
+</script>
 
 </body>
 </html>
