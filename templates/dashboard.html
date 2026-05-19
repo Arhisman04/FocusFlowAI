@@ -163,8 +163,37 @@ canvas {
 
 <div class="container">
 
-<h1>📊 Productivity Dashboard</h1>
-<div class="subtitle">AI-powered focus intelligence system</div>
+<div class="container">
+
+<!-- ================= PREMIUM HERO ================= -->
+<div class="hero-section">
+
+    <div class="hero-left">
+        <h1>🚀 FocusFlow AI</h1>
+
+        <p class="hero-text">
+            Your AI-powered academic recovery operating system.
+        </p>
+
+        <div class="hero-badges">
+            <span>🧠 AI Recovery Engine</span>
+            <span>📈 Predictive Analytics</span>
+            <span>⚡ Smart Productivity</span>
+        </div>
+    </div>
+
+    <div class="hero-right">
+
+        <div class="readiness-ring">
+            <div class="ring-inner">
+                <h2>{{ score }}</h2>
+                <p>Readiness</p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
 
 <!-- ================= STATS ================= -->
 <div class="grid">
@@ -176,6 +205,25 @@ canvas {
 <div class="card"><h3>🔥 Streak</h3><p>{{ streak }}</p></div>
 <div class="card"><h3>⚡ XP</h3><p>{{ xp }}</p></div>
 <div class="card"><h3>🏆 Level</h3><p>{{ level }}</p></div>
+
+</div>
+<!-- ================= ADVANCED ANALYTICS ================= -->
+<div class="analytics-grid">
+
+    <div class="analytics-card glow-blue">
+        <h3>🔥 Momentum</h3>
+        <p>{{ momentum }}</p>
+    </div>
+
+    <div class="analytics-card glow-orange">
+        <h3>⚠ Burnout Risk</h3>
+        <p>{{ burnout }}</p>
+    </div>
+
+    <div class="analytics-card glow-green">
+        <h3>📋 Pending Tasks</h3>
+        <p>{{ pending_tasks }}</p>
+    </div>
 
 </div>
 

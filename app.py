@@ -2,7 +2,11 @@ from flask import Flask, render_template, request, jsonify
 import datetime
 
 from services.ai_agent import ask_ai
-from database.mongodb import sessions_collection, tasks_collection, plans_collection
+from database.mongodb import (
+    sessions_collection,
+    tasks_collection,
+    plans_collection
+)
 
 app = Flask(__name__)
 
@@ -13,16 +17,43 @@ app = Flask(__name__)
 def dashboard():
 
     sessions = list(sessions_collection.find({}, {"_id": 0}))
+    tasks = list(tasks_collection.find({}, {"_id": 0}))
+
     total_time = sum(s["duration"] for s in sessions) if sessions else 0
+
+    score = min(
+        100,
+        int((total_time * 1.5) + (len(sessions) * 3))
+    )
+
+    xp = total_time * 5
+    level = (xp // 100) + 1
+
+    pending_tasks = len([t for t in tasks if not t["done"]])
+
+    burnout = (
+        "High 🔴" if total_time > 300
+        else "Medium 🟠" if total_time > 150
+        else "Low 🟢"
+    )
+
+    momentum = (
+        "Excellent 🔥" if total_time > 250
+        else "Improving 🚀" if total_time > 100
+        else "Needs Consistency 📉"
+    )
 
     return render_template(
         "dashboard.html",
         total_sessions=len(sessions),
         total_time=total_time,
         avg_time=(total_time / len(sessions)) if sessions else 0,
-        score=min(100, total_time * 2),
-        xp=total_time * 5,
-        level=(total_time * 5) // 100 + 1
+        score=score,
+        xp=xp,
+        level=level,
+        burnout=burnout,
+        pending_tasks=pending_tasks,
+        momentum=momentum
     )
 
 # =========================
@@ -34,11 +65,20 @@ def chat():
     msg = request.json.get("message", "")
 
     prompt = f"""
-You are a personal AI tutor.
+You are FocusFlowAI.
 
-Reply clearly and helpfully:
+You are an elite AI tutor and academic mentor.
 
+Student Message:
 {msg}
+
+Reply:
+- clearly
+- intelligently
+- supportively
+- practically
+
+Keep the answer concise but useful.
 """
 
     reply = ask_ai(prompt, mode="chat")
@@ -48,7 +88,7 @@ Reply clearly and helpfully:
     })
 
 # =========================
-# 🧠 AI PLANNER
+# 🧠 AI RECOVERY PLANNER
 # =========================
 @app.route("/generate-plan", methods=["POST"])
 def generate_plan():
@@ -62,7 +102,38 @@ def generate_plan():
             "plan": "No input provided"
         })
 
-    plan = ask_ai(user_input, mode="plan")
+    enhanced_prompt = f"""
+You are FocusFlowAI,
+an elite AI Academic Recovery Coach.
+
+Analyze the student's academic situation deeply.
+
+Student Input:
+{user_input}
+
+Generate:
+
+1. 📊 Recovery Analysis
+2. 🎯 Readiness Score (0-100)
+3. ⚠ Burnout Risk
+4. 📚 Weakness Detection
+5. 🚀 High ROI Topics
+6. ⏰ Daily Study Strategy
+7. 🔁 Revision Plan
+8. 🧠 Productivity Advice
+9. 💡 Motivation Guidance
+
+Your response must:
+- feel highly personalized
+- be emotionally intelligent
+- avoid generic advice
+- prioritize realistic recovery
+- optimize marks vs time
+
+Keep formatting clean and visually readable.
+"""
+
+    plan = ask_ai(enhanced_prompt, mode="plan")
 
     plans_collection.insert_one({
         "type": "manual",
@@ -77,27 +148,38 @@ def generate_plan():
     })
 
 # =========================
-# ⚡ AUTO DAILY PLAN (AGENT FEATURE)
+# ⚡ AUTO DAILY PLAN
 # =========================
 @app.route("/auto-plan")
 def auto_plan():
 
     sessions = list(sessions_collection.find({}, {"_id": 0}))
     plans = list(plans_collection.find({}, {"_id": 0}))
+    tasks = list(tasks_collection.find({}, {"_id": 0}))
 
     context = f"""
-You are an autonomous learning AI.
+You are FocusFlowAI.
 
-Past sessions:
+You are an autonomous academic optimization AI.
+
+Past Sessions:
 {sessions}
 
-Past plans:
+Past Plans:
 {plans}
 
-Generate today's optimized study plan:
+Pending Tasks:
+{tasks}
+
+Generate today's optimized study recovery plan.
+
+Requirements:
 - focus weak areas
 - realistic workload
-- include revision + breaks
+- include revision
+- include breaks
+- avoid burnout
+- prioritize important topics
 """
 
     plan = ask_ai(context, mode="plan")
@@ -129,17 +211,20 @@ def predict_performance():
     total = sum(s["duration"] for s in sessions)
     avg = total / len(sessions)
 
+    readiness = min(100, int(avg * 1.8))
+
     if avg < 20:
-        risk = "high"
+        risk = "high 🔴"
     elif avg < 50:
-        risk = "medium"
+        risk = "medium 🟠"
     else:
-        risk = "low"
+        risk = "low 🟢"
 
     return jsonify({
         "total_time": total,
         "avg_session": avg,
-        "risk_level": risk
+        "risk_level": risk,
+        "readiness_score": readiness
     })
 
 # =========================
@@ -155,16 +240,21 @@ def recommend():
     pending = len([t for t in tasks if not t["done"]])
 
     prompt = f"""
-You are an AI study advisor.
+You are an elite AI academic strategist.
 
-Student stats:
-- total study time: {total}
-- pending tasks: {pending}
+Student Stats:
+- Total Study Time: {total}
+- Pending Tasks: {pending}
 
-Give:
-1. next action
-2. focus advice
-3. motivation
+Generate:
+
+1. Next Best Action
+2. Focus Recommendation
+3. Weakness Advice
+4. Motivation
+5. Productivity Improvement
+
+Keep advice practical and personalized.
 """
 
     advice = ask_ai(prompt, mode="chat")
@@ -174,7 +264,7 @@ Give:
     })
 
 # =========================
-# 🔁 FEEDBACK LOOP (LEARNING ENGINE)
+# 🔁 FEEDBACK LOOP
 # =========================
 @app.route("/feedback-loop")
 def feedback_loop():
@@ -184,15 +274,18 @@ def feedback_loop():
     total = sum(s["duration"] for s in sessions)
 
     prompt = f"""
-Analyze student behavior:
+Analyze student behavior deeply.
 
-Total study time: {total}
-Sessions: {len(sessions)}
+Stats:
+- Total Study Time: {total}
+- Total Sessions: {len(sessions)}
 
 Return:
-- weakness
-- improvement
-- next step
+1. Biggest Weakness
+2. Improvement Area
+3. Recovery Suggestion
+4. Burnout Analysis
+5. Next Step
 """
 
     feedback = ask_ai(prompt, mode="chat")
@@ -211,18 +304,23 @@ def insight():
     total = sum(s["duration"] for s in sessions)
 
     if total < 50:
-        msg = "You need consistency 📉"
+        msg = "You need more consistency 📉"
+
     elif total < 150:
-        msg = "Good progress 🚀"
-    else:
+        msg = "Good momentum 🚀"
+
+    elif total < 300:
         msg = "Excellent discipline 🔥"
+
+    else:
+        msg = "Be careful of burnout ⚠"
 
     return jsonify({
         "insight": msg
     })
 
 # =========================
-# 📊 SESSIONS
+# 📊 ADD SESSION
 # =========================
 @app.route("/add_session", methods=["POST"])
 def add_session():
@@ -234,8 +332,13 @@ def add_session():
         "duration": duration
     })
 
-    return jsonify({"status": "ok"})
+    return jsonify({
+        "status": "ok"
+    })
 
+# =========================
+# 📊 GET SESSIONS
+# =========================
 @app.route("/api/sessions")
 def api_sessions():
 
@@ -243,7 +346,7 @@ def api_sessions():
     return jsonify(sessions)
 
 # =========================
-# ✅ TASK SYSTEM
+# ✅ ADD TASK
 # =========================
 @app.route("/add_task", methods=["POST"])
 def add_task():
@@ -256,20 +359,30 @@ def add_task():
         "date": str(datetime.date.today())
     })
 
-    return jsonify({"status": "ok"})
+    return jsonify({
+        "status": "ok"
+    })
 
+# =========================
+# 📋 GET TASKS
+# =========================
 @app.route("/get_tasks")
 def get_tasks():
 
     tasks = list(tasks_collection.find({}, {"_id": 0}))
     return jsonify(tasks)
 
+# =========================
+# 🔁 TOGGLE TASK
+# =========================
 @app.route("/toggle_task", methods=["POST"])
 def toggle_task():
 
     task_name = request.json.get("task")
 
-    task = tasks_collection.find_one({"task": task_name})
+    task = tasks_collection.find_one({
+        "task": task_name
+    })
 
     if task:
         tasks_collection.update_one(
@@ -277,16 +390,25 @@ def toggle_task():
             {"$set": {"done": not task["done"]}}
         )
 
-    return jsonify({"status": "updated"})
+    return jsonify({
+        "status": "updated"
+    })
 
+# =========================
+# ❌ DELETE TASK
+# =========================
 @app.route("/delete_task", methods=["POST"])
 def delete_task():
 
     task_name = request.json.get("task")
 
-    tasks_collection.delete_one({"task": task_name})
+    tasks_collection.delete_one({
+        "task": task_name
+    })
 
-    return jsonify({"status": "deleted"})
+    return jsonify({
+        "status": "deleted"
+    })
 
 # =========================
 # 📊 ANALYTICS
@@ -295,14 +417,27 @@ def delete_task():
 def analytics():
 
     sessions = list(sessions_collection.find({}, {"_id": 0}))
+    tasks = list(tasks_collection.find({}, {"_id": 0}))
+
     total_time = sum(s["duration"] for s in sessions) if sessions else 0
+
+    score = min(
+        100,
+        int((total_time * 1.5) + (len(sessions) * 3))
+    )
+
+    xp = total_time * 5
+    level = (xp // 100) + 1
+
+    completed = len([t for t in tasks if t["done"]])
 
     return jsonify({
         "sessions": len(sessions),
         "total_time": total_time,
-        "score": min(100, total_time * 2),
-        "xp": total_time * 5,
-        "level": (total_time * 5) // 100 + 1
+        "score": score,
+        "xp": xp,
+        "level": level,
+        "completed_tasks": completed
     })
 
 # =========================
