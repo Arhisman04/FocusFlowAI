@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>FocusFlow AI</title>
+
+<style>
+
+body {
+
+    margin: 0;
+    font-family: system-ui, sans-serif;
+
+    background:
+    radial-gradient(circle at top,
+    #0f172a,
+    #020617);
+
+    color: #e5e7eb;
+
+    overflow-x: hidden;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+nav {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 20px 40px;
+
+    background: rgba(255,255,255,0.04);
+
+    border-bottom:
+    1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(12px);
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+nav h2 {
+
+    color: #38bdf8;
+    font-size: 24px;
+}
+
+.nav-links {
+
+    display: flex;
+    gap: 24px;
+}
+
+.nav-links a {
+
+    color: #cbd5e1;
+    text-decoration: none;
+
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+
+    color: #38bdf8;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+
+    text-align: center;
+
+    padding:
+    120px 20px 80px;
+}
+
+.hero h1 {
+
+    font-size: 64px;
+    margin-bottom: 16px;
+
+    background:
+    linear-gradient(
+        to right,
+        #38bdf8,
+        #818cf8
+    );
+
+    background-clip: text;
+    -webkit-background-clip: text;
+
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+
+    color: #94a3b8;
+
+    font-size: 20px;
+
+    max-width: 760px;
+
+    margin: auto;
+
+    line-height: 1.7;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.hero-buttons {
+
+    margin-top: 35px;
+
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+
+    flex-wrap: wrap;
+}
+
+.btn {
+
+    display: inline-block;
+
+    padding: 14px 24px;
+
+    border-radius: 14px;
+
+    font-weight: bold;
+
+    text-decoration: none;
+
+    transition: 0.3s;
+}
+
+.primary-btn {
+
+    background:
+    linear-gradient(
+        to right,
+        #38bdf8,
+        #818cf8
+    );
+
+    color: white;
+
+    box-shadow:
+    0 0 25px rgba(56,189,248,0.25);
+}
+
+.primary-btn:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow:
+    0 0 35px rgba(56,189,248,0.45);
+}
+
+.secondary-btn {
+
+    border:
+    1px solid rgba(255,255,255,0.12);
+
+    color: #cbd5e1;
+
+    background:
+    rgba(255,255,255,0.04);
+}
+
+.secondary-btn:hover {
+
+    border-color: #38bdf8;
+}
+
+/* =========================
+   FEATURES
+========================= */
+
+.features {
+
+    display: grid;
+
+    grid-template-columns:
+    repeat(auto-fit, minmax(250px, 1fr));
+
+    gap: 24px;
+
+    padding: 60px 40px 90px;
+
+    max-width: 1200px;
+
+    margin: auto;
+}
+
+.card {
+
+    background:
+    rgba(255,255,255,0.05);
+
+    border:
+    1px solid rgba(255,255,255,0.08);
+
+    border-radius: 20px;
+
+    padding: 28px;
+
+    backdrop-filter: blur(12px);
+
+    transition: 0.3s;
+}
+
+.card:hover {
+
+    transform: translateY(-6px);
+
+    border-color: #38bdf8;
+
+    box-shadow:
+    0 0 30px rgba(56,189,248,0.18);
+}
+
+.card h3 {
+
+    margin-bottom: 12px;
+}
+
+.card p {
+
+    color: #94a3b8;
+
+    line-height: 1.6;
+}
+
+/* =========================
+   STATS SECTION
+========================= */
+
+.stats {
+
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+
+    flex-wrap: wrap;
+
+    padding-bottom: 80px;
+}
+
+.stat-box {
+
+    text-align: center;
+}
+
+.stat-box h2 {
+
+    font-size: 42px;
+
+    color: #38bdf8;
+
+    margin-bottom: 8px;
+}
+
+.stat-box p {
+
+    color: #94a3b8;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+
+    text-align: center;
+
+    padding: 40px;
+
+    color: #64748b;
+
+    border-top:
+    1px solid rgba(255,255,255,0.08);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width: 768px) {
+
+    nav {
+
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .hero h1 {
+
+        font-size: 42px;
+    }
+
+    .hero p {
+
+        font-size: 16px;
+    }
+
+    .features {
+
+        padding: 40px 20px 70px;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- =========================
+     NAVBAR
+========================= -->
+
+<nav>
+
+    <h2>🧠 FocusFlow AI</h2>
+
+    <div class="nav-links">
+
+        <a href="/">Home</a>
+
+        <a href="/dashboard">Dashboard</a>
+
+        <a href="/planner">Planner</a>
+
+    </div>
+
+</nav>
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section class="hero">
+
+    <h1>AI Academic Recovery System</h1>
+
+    <p>
+
+        FocusFlow AI helps students recover from burnout,
+        improve consistency, optimize study systems,
+        and build personalized AI-powered recovery plans.
+
+    </p>
+
+    <div class="hero-buttons">
+
+        <a class="btn primary-btn"
+           href="/dashboard">
+
+            🚀 Open Dashboard
+
+        </a>
+
+        <a class="btn secondary-btn"
+           href="/planner">
+
+            🧠 Try AI Planner
+
+        </a>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     FEATURES
+========================= -->
+
+<section class="features">
+
+    <div class="card">
+
+        <h3>📊 Smart Analytics</h3>
+
+        <p>
+
+            Track productivity, study trends,
+            momentum, and performance growth
+            through intelligent analytics.
+
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>🧠 AI Recovery Planner</h3>
+
+        <p>
+
+            Generate adaptive academic recovery plans
+            personalized to your exam pressure,
+            backlog, and weak areas.
+
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>⚠ Burnout Prediction</h3>
+
+        <p>
+
+            Detect unhealthy study patterns early
+            and optimize workload before burnout happens.
+
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>💬 AI Tutor</h3>
+
+        <p>
+
+            Ask academic questions instantly
+            and receive AI-powered tutoring guidance.
+
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     STATS
+========================= -->
+
+<section class="stats">
+
+    <div class="stat-box">
+
+        <h2>AI</h2>
+
+        <p>Adaptive Intelligence</p>
+
+    </div>
+
+    <div class="stat-box">
+
+        <h2>24/7</h2>
+
+        <p>Study Support</p>
+
+    </div>
+
+    <div class="stat-box">
+
+        <h2>Smart</h2>
+
+        <p>Recovery Optimization</p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer>
+
+    Built with AI • FocusFlow AI • Academic Recovery Platform
+
+</footer>
+
+</body>
+</html>

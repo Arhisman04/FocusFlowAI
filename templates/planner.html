@@ -2,45 +2,335 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FocusFlow AI Planner</title>
+
+<style>
+
+/* =========================
+   BASE
+========================= */
+
+body {
+
+    margin: 0;
+    font-family: system-ui, sans-serif;
+
+    background: radial-gradient(circle at top,
+    #0f172a,
+    #020617);
+
+    color: #e5e7eb;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+nav {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 20px 40px;
+
+    background: rgba(255,255,255,0.04);
+
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(12px);
+}
+
+nav h2 {
+
+    color: #38bdf8;
+}
+
+.nav-links {
+
+    display: flex;
+    gap: 24px;
+}
+
+.nav-links a {
+
+    color: #cbd5e1;
+    text-decoration: none;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
+.container {
+
+    max-width: 1000px;
+    margin: auto;
+
+    padding: 50px 24px;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.hero h1 {
+
+    font-size: 48px;
+
+    background: linear-gradient(
+        to right,
+        #38bdf8,
+        #818cf8
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+
+    color: #94a3b8;
+    max-width: 700px;
+    margin: auto;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card {
+
+    background: rgba(255,255,255,0.05);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 20px;
+
+    padding: 30px;
+
+    backdrop-filter: blur(12px);
+}
+
+/* =========================
+   FORM
+========================= */
+
+.form {
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 16px;
+}
+
+textarea {
+
+    grid-column: span 2;
+    min-height: 120px;
+}
+
+input, textarea {
+
+    padding: 14px;
+
+    border-radius: 12px;
+    border: none;
+
+    background: #111827;
+    color: white;
+
+    outline: none;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+button {
+
+    grid-column: span 2;
+
+    padding: 14px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: linear-gradient(
+        to right,
+        #38bdf8,
+        #818cf8
+    );
+
+    color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+/* =========================
+   OUTPUT
+========================= */
+
+.output {
+
+    margin-top: 25px;
+
+    background: rgba(255,255,255,0.04);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    min-height: 120px;
+
+    line-height: 1.6;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width: 768px) {
+
+    .form {
+        grid-template-columns: 1fr;
+    }
+
+    button, textarea {
+        grid-column: span 1;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+}
+
+</style>
+
 </head>
 
 <body>
 
-    <nav>
+<!-- NAVBAR -->
+<nav>
 
-        <h2>FocusFlow AI</h2>
+    <h2>🧠 FocusFlow AI</h2>
 
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/dashboard">Dashboard</a>
-            <a href="/planner">Planner</a>
-            <a href="/timer">Timer</a>
-        </div>
+    <div class="nav-links">
 
-    </nav>
-
-    <div class="planner-container">
-
-        <h1>Smart Study Planner</h1>
-
-        <form class="planner-form">
-
-            <input type="text" placeholder="Subject">
-
-            <input type="number" placeholder="Study Hours">
-
-            <input type="date">
-
-            <button type="submit">Generate Plan</button>
-
-        </form>
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/planner">Planner</a>
 
     </div>
+
+</nav>
+
+<!-- CONTENT -->
+<div class="container">
+
+    <div class="hero">
+
+        <h1>AI Study Planner</h1>
+
+        <p>
+            Generate personalized academic recovery plans based on your workload,
+            stress level, and exam timeline.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <div class="form">
+
+            <input id="subject" placeholder="Subject">
+
+            <input id="examDate" type="date">
+
+            <input id="studyHours" type="number" placeholder="Daily Hours">
+
+            <input id="stress" placeholder="Stress Level">
+
+            <textarea id="details"
+                placeholder="Describe your situation..."></textarea>
+
+            <button onclick="generatePlan()">
+                Generate Plan
+            </button>
+
+        </div>
+
+        <div id="planOutput" class="output">
+            Your AI plan will appear here...
+        </div>
+
+    </div>
+
+</div>
+
+<!-- SCRIPT -->
+<script>
+
+function generatePlan() {
+
+    const input = `
+Subject: ${document.getElementById("subject").value}
+Exam Date: ${document.getElementById("examDate").value}
+Daily Hours: ${document.getElementById("studyHours").value}
+Stress: ${document.getElementById("stress").value}
+
+Details:
+${document.getElementById("details").value}
+`;
+
+    const output = document.getElementById("planOutput");
+
+    output.innerHTML = "⏳ Generating AI plan...";
+
+    fetch("/generate-plan", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({ input })
+
+    })
+
+    .then(r => r.json())
+
+    .then(data => {
+
+        output.innerHTML = data.plan;
+
+    })
+
+    .catch(() => {
+
+        output.innerHTML = "❌ Error generating plan";
+
+    });
+
+}
+
+</script>
 
 </body>
 </html>

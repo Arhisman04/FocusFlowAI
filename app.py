@@ -11,10 +11,65 @@ from database.mongodb import (
 app = Flask(__name__)
 
 # =========================
-# 🏠 DASHBOARD
+# 🏠 LANDING PAGE
 # =========================
 @app.route("/")
+def landing():
+    return render_template("landing.html")
+
+
+# =========================
+# 📊 DASHBOARD
+# =========================
+@app.route("/dashboard")
 def dashboard():
+
+    sessions = list(sessions_collection.find({}, {"_id": 0}))
+    tasks = list(tasks_collection.find({}, {"_id": 0}))
+
+    total_time = sum(s["duration"] for s in sessions) if sessions else 0
+
+    score = min(
+        100,
+        int((total_time * 1.5) + (len(sessions) * 3))
+    )
+
+    xp = total_time * 5
+    level = (xp // 100) + 1
+
+    pending_tasks = len([t for t in tasks if not t["done"]])
+
+    burnout = (
+        "High 🔴" if total_time > 300
+        else "Medium 🟠" if total_time > 150
+        else "Low 🟢"
+    )
+
+    momentum = (
+        "Excellent 🔥" if total_time > 250
+        else "Improving 🚀" if total_time > 100
+        else "Needs Consistency 📉"
+    )
+
+    ai_insight = (
+        "You're building strong momentum 🚀"
+        if total_time > 120
+        else "Consistency is your biggest upgrade path 📈"
+    )
+
+    return render_template(
+        "dashboard.html",
+        total_sessions=len(sessions),
+        total_time=total_time,
+        avg_time=(total_time / len(sessions)) if sessions else 0,
+        score=score,
+        xp=xp,
+        level=level,
+        burnout=burnout,
+        pending_tasks=pending_tasks,
+        momentum=momentum,
+        ai_insight=ai_insight
+    )
 
     sessions = list(sessions_collection.find({}, {"_id": 0}))
     tasks = list(tasks_collection.find({}, {"_id": 0}))
@@ -90,6 +145,9 @@ Keep the answer concise but useful.
 # =========================
 # 🧠 AI RECOVERY PLANNER
 # =========================
+@app.route("/planner")
+def planner():
+    return render_template("planner.html")
 @app.route("/generate-plan", methods=["POST"])
 def generate_plan():
 
