@@ -1,15 +1,11 @@
 import os
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 
-# Load environment variables
 load_dotenv()
 
-# Configure Gemini API
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-# Initialize Gemini model
-model = genai.GenerativeModel("gemini-2.0-flash")
+# ✅ correct client init
+client = genai.Client(api_key=os.getenv("AIzaSyBPRdyX_GMz495c5zWbElj3Y2Vpdbdof18"))
 
 
 def generate_plan(prompt):
@@ -21,7 +17,10 @@ def generate_plan(prompt):
         if not prompt or prompt.strip() == "":
             return "Please enter a valid prompt."
 
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt
+        )
 
         if not response or not response.text:
             return "No response from AI."

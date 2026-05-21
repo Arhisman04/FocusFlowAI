@@ -1,0 +1,170 @@
+body {
+
+    margin: 0;
+    font-family: system-ui;
+    background: #050816;
+    overflow: hidden;
+    color: white;
+}
+
+.bg-blur {
+
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    background:
+    radial-gradient(circle at top left, #38bdf830, transparent 30%),
+    radial-gradient(circle at bottom right, #8b5cf630, transparent 30%);
+
+    animation: floatBg 10s infinite alternate ease-in-out;
+}
+
+@keyframes floatBg {
+
+    from {
+        transform: scale(1) translateY(0px);
+    }
+
+    to {
+        transform: scale(1.1) translateY(-20px);
+    }
+}
+
+.auth-container {
+
+    height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+    z-index: 2;
+}
+
+.auth-card {
+
+    width: 380px;
+
+    background: rgba(255,255,255,0.06);
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    backdrop-filter: blur(18px);
+
+    border-radius: 24px;
+
+    padding: 40px;
+
+    box-shadow:
+    0 0 40px rgba(56,189,248,0.12);
+
+    animation: fadeUp 1s ease;
+}
+
+@keyframes fadeUp {
+
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+}
+
+.auth-card h1 {
+
+    margin-bottom: 10px;
+    font-size: 32px;
+}
+
+.auth-card p {
+
+    color: #9ca3af;
+    margin-bottom: 24px;
+}
+
+input {
+
+    width: 100%;
+    padding: 14px;
+
+    margin-bottom: 14px;
+
+    border-radius: 14px;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    background: rgba(255,255,255,0.05);
+
+    color: white;
+
+    outline: none;
+
+    transition: 0.3s;
+}
+
+input:focus {
+
+    border-color: #38bdf8;
+
+    box-shadow:
+    0 0 20px rgba(56,189,248,0.2);
+}
+
+button {
+
+    width: 100%;
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background: linear-gradient(
+        135deg,
+        #38bdf8,
+        #8b5cf6
+    );
+
+    color: white;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+    0 10px 30px rgba(56,189,248,0.3);
+}
+
+.switch {
+
+    margin-top: 20px;
+    text-align: center;
+
+    color: #9ca3af;
+}
+
+.switch a {
+
+    color: #38bdf8;
+    text-decoration: none;
+}
+
+#status {
+
+    margin-top: 16px;
+    text-align: center;
+}

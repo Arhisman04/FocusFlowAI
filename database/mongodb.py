@@ -1,13 +1,13 @@
-import os
 from pymongo import MongoClient
-from dotenv import load_dotenv
 
-load_dotenv()
+client = MongoClient(
+    "mongodb+srv://archisman:22428126422283558340agad@focusflowcluster.rfnktuo.mongodb.net/?retryWrites=true&w=majority&appName=FocusFlowCluster"
+)
 
-client = MongoClient(os.getenv("MONGO_URI"))
-
-db = client["focusflow_ai"]
+db = client["focusflow"]
 
 sessions_collection = db["sessions"]
 tasks_collection = db["tasks"]
 plans_collection = db["plans"]
+memory_collection = db["memory"]
+users_collection = db["users"]

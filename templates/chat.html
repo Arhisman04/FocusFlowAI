@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>FocusFlowAI Chat</title>
+
+    <link rel="stylesheet" href="/static/chat.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <div class="top-bar">
+        <h1>🧠 FocusFlowAI</h1>
+        <p>AI Academic Mentor</p>
+    </div>
+
+    <div id="chat-box"></div>
+
+    <div class="input-area">
+
+        <textarea
+            id="message"
+            placeholder="Ask FocusFlowAI anything..."
+        ></textarea>
+
+        <button onclick="sendMessage()">
+            Send 🚀
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+async function sendMessage() {
+
+    const msgBox = document.getElementById("message");
+    const chatBox = document.getElementById("chat-box");
+
+    const message = msgBox.value;
+
+    if (!message.trim()) return;
+
+    // USER MESSAGE
+
+    chatBox.innerHTML += `
+        <div class="user-message">
+            ${message}
+        </div>
+    `;
+
+    // LOADING
+
+    const loadingId = "loading-" + Date.now();
+
+    chatBox.innerHTML += `
+        <div class="ai-message" id="${loadingId}">
+            <span class="thinking">
+                FocusFlowAI is thinking...
+            </span>
+        </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    msgBox.value = "";
+
+    // SEND REQUEST
+
+    const response = await fetch("/chat", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            message: message
+        })
+
+    });
+
+    const data = await response.json();
+
+    // REMOVE LOADING
+
+    document.getElementById(loadingId).remove();
+
+    // AI RESPONSE
+
+    const aiDiv = document.createElement("div");
+
+    aiDiv.className = "ai-message";
+
+    chatBox.appendChild(aiDiv);
+
+    // TYPING EFFECT
+
+    let text = data.response;
+    let i = 0;
+
+    function typeEffect() {
+
+        if (i < text.length) {
+
+            aiDiv.innerHTML =
+                marked.parse(text.substring(0, i));
+
+            i++;
+
+            setTimeout(typeEffect, 10);
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+
+    typeEffect();
+}
+
+</script>
+
+</body>
+</html>

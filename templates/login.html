@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login • FocusFlowAI</title>
+
+<link rel="stylesheet" href="/static/auth.css">
+
+</head>
+<body>
+
+<div class="bg-blur"></div>
+
+<div class="auth-container">
+
+    <div class="auth-card">
+
+        <h1>Welcome Back 🚀</h1>
+
+        <p>Login to continue your productivity journey.</p>
+
+        <input type="email" id="email" placeholder="Email">
+
+        <input type="password" id="password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+
+        <div class="switch">
+            Don't have an account?
+            <a href="/signup">Create One</a>
+        </div>
+
+        <div id="status"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+async function login() {
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const status = document.getElementById("status");
+
+    status.innerHTML = "⏳ Logging in...";
+
+    try {
+
+        const response = await fetch("/login", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                email,
+                password
+            })
+
+        });
+
+        const data = await response.json();
+
+        if(data.status === "success") {
+
+
+            status.innerHTML = "✅ Login successful";
+
+            setTimeout(() => {
+                window.location.href = "/dashboard";
+            }, 1000);
+
+        } else {
+
+            status.innerHTML = "❌ Invalid credentials";
+
+        }
+
+    } catch(err) {
+
+        status.innerHTML = "❌ Server error";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

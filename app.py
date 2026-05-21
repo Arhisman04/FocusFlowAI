@@ -1,31 +1,97 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect
 import datetime
+import bcrypt
 
 from services.ai_agent import ask_ai
 from database.mongodb import (
     sessions_collection,
     tasks_collection,
-    plans_collection
+    plans_collection, memory_collection
 )
+from database.mongodb import users_collection
+from flask_jwt_extended import (JWTManager,create_access_token,jwt_required,get_jwt_identity)
 
 app = Flask(__name__)
+app = Flask(__name__)
 
+app.secret_key = "focusflow_super_secret"
+
+app.config["JWT_SECRET_KEY"] = "your_secret_key_change_this"
+
+jwt = JWTManager(app)
+app.config["JWT_SECRET_KEY"] = "your_secret_key_change_this"
+jwt = JWTManager(app)
+@app.route("/register", methods=["POST"])
+def register():
+
+    data = request.json
+
+    name = data["name"]
+    email = data["email"]
+    password = data["password"]
+
+    users_collection.insert_one({
+        "name": name,
+        "email": email,
+        "password_hash": bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()),
+        "created_at": str(datetime.date.today())
+    })
+
+    return jsonify({"status": "success"})
+@app.route("/login", methods=["POST"])
+def login():
+
+    data = request.json
+    email = data["email"]
+    password = data["password"]
+
+    user = users_collection.find_one({"email": email})
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if not bcrypt.checkpw(password.encode("utf-8"), user["password_hash"]):
+        return jsonify({"error": "Wrong password"}), 401
+    session["user"] = email
+
+    return jsonify({
+        "status": "success",
+    })
 # =========================
 # 🏠 LANDING PAGE
 # =========================
 @app.route("/")
 def landing():
     return render_template("landing.html")
+@app.route("/login-page")
+def login_page():
+    return render_template("login.html")
 
 
+@app.route("/signup")
+def signup_page():
+    return render_template("signup.html")
+@app.route("/logout")
+def logout():
+
+    session.pop("user", None)
+
+    return redirect("/login-page")
 # =========================
 # 📊 DASHBOARD
 # =========================
 @app.route("/dashboard")
 def dashboard():
 
+    if "user" not in session:
+        return redirect("/login-page")
     sessions = list(sessions_collection.find({}, {"_id": 0}))
-    tasks = list(tasks_collection.find({}, {"_id": 0}))
+    tasks = list(
+    tasks_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
 
     total_time = sum(s["duration"] for s in sessions) if sessions else 0
 
@@ -70,46 +136,20 @@ def dashboard():
         momentum=momentum,
         ai_insight=ai_insight
     )
+@app.route("/ai-chat")
+def ai_chat():
 
-    sessions = list(sessions_collection.find({}, {"_id": 0}))
-    tasks = list(tasks_collection.find({}, {"_id": 0}))
+    if "user" not in session:
+        return redirect("/login-page")
 
-    total_time = sum(s["duration"] for s in sessions) if sessions else 0
+    return render_template("chat.html")
+@app.route("/timer")
+def timer():
 
-    score = min(
-        100,
-        int((total_time * 1.5) + (len(sessions) * 3))
-    )
+    if "user" not in session:
+        return redirect("/login-page")
 
-    xp = total_time * 5
-    level = (xp // 100) + 1
-
-    pending_tasks = len([t for t in tasks if not t["done"]])
-
-    burnout = (
-        "High 🔴" if total_time > 300
-        else "Medium 🟠" if total_time > 150
-        else "Low 🟢"
-    )
-
-    momentum = (
-        "Excellent 🔥" if total_time > 250
-        else "Improving 🚀" if total_time > 100
-        else "Needs Consistency 📉"
-    )
-
-    return render_template(
-        "dashboard.html",
-        total_sessions=len(sessions),
-        total_time=total_time,
-        avg_time=(total_time / len(sessions)) if sessions else 0,
-        score=score,
-        xp=xp,
-        level=level,
-        burnout=burnout,
-        pending_tasks=pending_tasks,
-        momentum=momentum
-    )
+    return render_template("timer.html")
 
 # =========================
 # 💬 AI CHAT (AGENT CORE)
@@ -117,31 +157,69 @@ def dashboard():
 @app.route("/chat", methods=["POST"])
 def chat():
 
+    if "user" not in session:
+        return jsonify({
+            "error": "Unauthorized"
+        }), 401
+
     msg = request.json.get("message", "")
+
+    memories = list(
+        memory_collection.find(
+            {"user": session["user"]},
+            {"_id": 0}
+        )
+    )
 
     prompt = f"""
 You are FocusFlowAI.
 
 You are an elite AI tutor and academic mentor.
 
+Student Memory:
+{memories}
+
 Student Message:
 {msg}
 
-Reply:
-- clearly
-- intelligently
-- supportively
-- practically
-
-Keep the answer concise but useful.
+Reply intelligently using memory context.
 """
 
     reply = ask_ai(prompt, mode="chat")
 
+    memory_collection.insert_one({
+
+        "user": session["user"],
+
+        "memory": {
+            "message": msg,
+            "reply": reply
+        },
+
+        "date": str(datetime.date.today())
+    })
+
     return jsonify({
         "response": reply
     })
+@app.route("/save-memory", methods=["POST"])
+def save_memory():
 
+    data = request.json
+
+    memory_collection.insert_one({
+
+        "user": session["user"],
+
+        "memory": data["memory"],
+
+        "date": str(datetime.date.today())
+
+    })
+
+    return jsonify({
+        "status":"saved"
+    })
 # =========================
 # 🧠 AI RECOVERY PLANNER
 # =========================
@@ -194,11 +272,11 @@ Keep formatting clean and visually readable.
     plan = ask_ai(enhanced_prompt, mode="plan")
 
     plans_collection.insert_one({
-        "type": "manual",
-        "input": user_input,
-        "plan": plan,
-        "date": str(datetime.date.today())
-    })
+    "user": session["user"],
+    "type": "auto",
+    "plan": plan,
+    "date": str(datetime.date.today())
+})
 
     return jsonify({
         "status": "success",
@@ -212,8 +290,18 @@ Keep formatting clean and visually readable.
 def auto_plan():
 
     sessions = list(sessions_collection.find({}, {"_id": 0}))
-    plans = list(plans_collection.find({}, {"_id": 0}))
-    tasks = list(tasks_collection.find({}, {"_id": 0}))
+    plans = list(
+    plans_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
+    tasks = list(
+    tasks_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
 
     context = f"""
 You are FocusFlowAI.
@@ -243,10 +331,11 @@ Requirements:
     plan = ask_ai(context, mode="plan")
 
     plans_collection.insert_one({
-        "type": "auto",
-        "plan": plan,
-        "date": str(datetime.date.today())
-    })
+    "user": session["user"],
+    "type": "auto",
+    "plan": plan,
+    "date": str(datetime.date.today())
+})
 
     return jsonify({
         "plan": plan
@@ -258,7 +347,12 @@ Requirements:
 @app.route("/predict-performance")
 def predict_performance():
 
-    sessions = list(sessions_collection.find({}, {"_id": 0}))
+    sessions = list(
+    sessions_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
 
     if not sessions:
         return jsonify({
@@ -291,8 +385,18 @@ def predict_performance():
 @app.route("/recommend")
 def recommend():
 
-    sessions = list(sessions_collection.find({}, {"_id": 0}))
-    tasks = list(tasks_collection.find({}, {"_id": 0}))
+    sessions = list(
+    sessions_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
+    tasks = list(
+    tasks_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
 
     total = sum(s["duration"] for s in sessions)
     pending = len([t for t in tasks if not t["done"]])
@@ -327,7 +431,12 @@ Keep advice practical and personalized.
 @app.route("/feedback-loop")
 def feedback_loop():
 
-    sessions = list(sessions_collection.find({}, {"_id": 0}))
+    sessions = list(
+    sessions_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
 
     total = sum(s["duration"] for s in sessions)
 
@@ -358,7 +467,12 @@ Return:
 @app.route("/insight")
 def insight():
 
-    sessions = list(sessions_collection.find({}, {"_id": 0}))
+    sessions = list(
+    sessions_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
     total = sum(s["duration"] for s in sessions)
 
     if total < 50:
@@ -386,9 +500,10 @@ def add_session():
     duration = request.json.get("duration", 0)
 
     sessions_collection.insert_one({
-        "date": str(datetime.date.today()),
-        "duration": duration
-    })
+    "user": session["user"],
+    "date": str(datetime.date.today()),
+    "duration": duration
+})
 
     return jsonify({
         "status": "ok"
@@ -400,8 +515,11 @@ def add_session():
 @app.route("/api/sessions")
 def api_sessions():
 
-    sessions = list(sessions_collection.find({}, {"_id": 0}))
-    return jsonify(sessions)
+    sessions = list(sessions_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    ))
+    return jsonify(sessions) 
 
 # =========================
 # ✅ ADD TASK
@@ -412,10 +530,11 @@ def add_task():
     task = request.json.get("task")
 
     tasks_collection.insert_one({
-        "task": task,
-        "done": False,
-        "date": str(datetime.date.today())
-    })
+    "user": session["user"],
+    "task": task,
+    "done": False,
+    "date": str(datetime.date.today())
+})
 
     return jsonify({
         "status": "ok"
@@ -427,7 +546,12 @@ def add_task():
 @app.route("/get_tasks")
 def get_tasks():
 
-    tasks = list(tasks_collection.find({}, {"_id": 0}))
+    tasks = list(
+    tasks_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
     return jsonify(tasks)
 
 # =========================
@@ -474,8 +598,18 @@ def delete_task():
 @app.route("/analytics")
 def analytics():
 
-    sessions = list(sessions_collection.find({}, {"_id": 0}))
-    tasks = list(tasks_collection.find({}, {"_id": 0}))
+    sessions = list(
+    sessions_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
+    tasks = list(
+    tasks_collection.find(
+        {"user": session["user"]},
+        {"_id": 0}
+    )
+)
 
     total_time = sum(s["duration"] for s in sessions) if sessions else 0
 

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FocusFlowAI • Focus Timer</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:Inter,system-ui;
+    background:#050816;
+    overflow:hidden;
+    color:white;
+}
+
+/* BACKGROUND */
+
+.bg{
+
+    position:fixed;
+    inset:0;
+
+    background:
+    radial-gradient(circle at top left,#38bdf820,transparent 30%),
+    radial-gradient(circle at bottom right,#8b5cf620,transparent 30%),
+    #050816;
+
+    animation:bgMove 10s infinite alternate ease-in-out;
+}
+
+@keyframes bgMove{
+
+    from{
+        transform:scale(1);
+    }
+
+    to{
+        transform:scale(1.08);
+    }
+}
+
+/* CONTAINER */
+
+.container{
+
+    position:relative;
+    z-index:2;
+
+    height:100vh;
+
+    display:flex;
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+}
+
+/* TOP */
+
+.topbar{
+
+    position:absolute;
+
+    top:25px;
+    left:30px;
+    right:30px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+
+    font-size:24px;
+    font-weight:800;
+
+    color:#38bdf8;
+}
+
+.stats{
+
+    display:flex;
+    gap:18px;
+}
+
+.stat-card{
+
+    background:rgba(255,255,255,0.05);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(12px);
+
+    padding:12px 18px;
+
+    border-radius:18px;
+
+    text-align:center;
+}
+
+.stat-card h3{
+
+    font-size:12px;
+    color:#94a3b8;
+}
+
+.stat-card p{
+
+    margin-top:4px;
+    font-size:20px;
+    font-weight:700;
+}
+
+/* TIMER */
+
+.timer-wrapper{
+
+    position:relative;
+
+    width:340px;
+    height:340px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+svg{
+
+    position:absolute;
+    transform:rotate(-90deg);
+}
+
+circle{
+
+    fill:none;
+    stroke-width:12;
+    stroke-linecap:round;
+}
+
+.bg-ring{
+
+    stroke:#1e293b;
+}
+
+.progress-ring{
+
+    stroke:url(#gradient);
+
+    stroke-dasharray:879;
+
+    stroke-dashoffset:0;
+
+    filter:drop-shadow(0 0 16px #38bdf8);
+
+    transition:stroke-dashoffset 1s linear;
+}
+
+.timer-content{
+
+    width:250px;
+    height:250px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,0.05);
+
+    backdrop-filter:blur(16px);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    box-shadow:
+    0 0 40px rgba(56,189,248,0.15);
+}
+
+.timer{
+
+    font-size:64px;
+    font-weight:800;
+}
+
+.mode{
+
+    margin-top:8px;
+
+    color:#94a3b8;
+}
+
+/* BUTTONS */
+
+.controls{
+
+    margin-top:40px;
+
+    display:flex;
+    gap:16px;
+}
+
+button{
+
+    border:none;
+
+    padding:14px 28px;
+
+    border-radius:18px;
+
+    font-size:16px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.start{
+
+    background:linear-gradient(
+        135deg,
+        #38bdf8,
+        #8b5cf6
+    );
+
+    color:white;
+
+    box-shadow:
+    0 0 30px rgba(56,189,248,0.3);
+}
+
+.pause{
+
+    background:#1e293b;
+    color:white;
+}
+
+.reset{
+
+    background:#111827;
+    color:white;
+}
+
+button:hover{
+
+    transform:translateY(-3px);
+}
+
+/* AI BOX */
+
+.ai-box{
+
+    margin-top:40px;
+
+    width:500px;
+
+    background:rgba(255,255,255,0.05);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(16px);
+
+    padding:24px;
+
+    border-radius:24px;
+
+    text-align:center;
+
+    line-height:1.7;
+
+    color:#cbd5e1;
+
+    animation:pulse 3s infinite;
+}
+
+@keyframes pulse{
+
+    0%{
+        box-shadow:0 0 20px rgba(56,189,248,0.05);
+    }
+
+    50%{
+        box-shadow:0 0 40px rgba(56,189,248,0.15);
+    }
+
+    100%{
+        box-shadow:0 0 20px rgba(56,189,248,0.05);
+    }
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="bg"></div>
+
+<div class="container">
+
+    <div class="topbar">
+
+        <div class="logo">
+            FocusFlowAI
+        </div>
+
+        <div class="stats">
+
+            <div class="stat-card">
+                <h3>🔥 Streak</h3>
+                <p id="streak">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>⚡ XP</h3>
+                <p id="xp">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>📈 Sessions</h3>
+                <p id="sessions">0</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="timer-wrapper">
+
+        <svg width="340" height="340">
+
+            <defs>
+
+                <linearGradient id="gradient">
+
+                    <stop offset="0%" stop-color="#38bdf8"/>
+                    <stop offset="100%" stop-color="#8b5cf6"/>
+
+                </linearGradient>
+
+            </defs>
+
+            <circle
+                class="bg-ring"
+                cx="170"
+                cy="170"
+                r="140"
+            />
+
+            <circle
+                class="progress-ring"
+                cx="170"
+                cy="170"
+                r="140"
+            />
+
+        </svg>
+
+        <div class="timer-content">
+
+            <div class="timer" id="timer">
+                25:00
+            </div>
+
+            <div class="mode">
+                AI Focus Mode Active 🚀
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="controls">
+
+        <button class="start" onclick="startTimer()">
+            Start Focus
+        </button>
+
+        <button class="pause" onclick="pauseTimer()">
+            Pause
+        </button>
+
+        <button class="reset" onclick="resetTimer()">
+            Reset
+        </button>
+
+    </div>
+
+    <div class="ai-box" id="aiBox">
+
+        🧠 AI Insight:
+        Deep work sessions above 25 minutes significantly improve memory retention and conceptual understanding.
+
+    </div>
+
+</div>
+
+<script>
+
+let totalTime = 25 * 60;
+let timeLeft = totalTime;
+
+let timerRunning = false;
+let timerInterval;
+
+const timerEl = document.getElementById("timer");
+const ring = document.querySelector(".progress-ring");
+
+const radius = 140;
+const circumference = 2 * Math.PI * radius;
+
+ring.style.strokeDasharray = circumference;
+
+function updateDisplay(){
+
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+
+    timerEl.innerHTML =
+        `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+
+    const progress = timeLeft / totalTime;
+
+    ring.style.strokeDashoffset =
+        circumference * (1 - progress);
+}
+
+function startTimer(){
+
+    if(timerRunning) return;
+
+    timerRunning = true;
+
+    timerInterval = setInterval(()=>{
+
+        timeLeft--;
+
+        updateDisplay();
+
+        if(timeLeft <= 0){
+
+            clearInterval(timerInterval);
+
+            timerRunning = false;
+
+            completeSession();
+
+        }
+
+    },1000);
+
+}
+
+function pauseTimer(){
+
+    clearInterval(timerInterval);
+
+    timerRunning = false;
+}
+
+function resetTimer(){
+
+    clearInterval(timerInterval);
+
+    timerRunning = false;
+
+    timeLeft = totalTime;
+
+    updateDisplay();
+}
+
+async function completeSession(){
+
+    alert("🔥 Focus Session Completed");
+
+    const minutesFocused = totalTime / 60;
+
+    let streak =
+        Number(localStorage.getItem("streak") || 0);
+
+    let xp =
+        Number(localStorage.getItem("xp") || 0);
+
+    let sessions =
+        Number(localStorage.getItem("sessions") || 0);
+
+    streak++;
+    xp += minutesFocused * 5;
+    sessions++;
+
+    localStorage.setItem("streak", streak);
+    localStorage.setItem("xp", xp);
+    localStorage.setItem("sessions", sessions);
+
+    document.getElementById("streak").innerHTML = streak;
+    document.getElementById("xp").innerHTML = xp;
+    document.getElementById("sessions").innerHTML = sessions;
+
+    await fetch("/add_session", {
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+            duration: minutesFocused
+        })
+
+    });
+
+    document.getElementById("aiBox").innerHTML = `
+        🧠 AI Analysis:
+        Excellent deep focus session detected.
+        Your productivity momentum is increasing 🚀
+    `;
+}
+
+function loadStats(){
+
+    document.getElementById("streak").innerHTML =
+        localStorage.getItem("streak") || 0;
+
+    document.getElementById("xp").innerHTML =
+        localStorage.getItem("xp") || 0;
+
+    document.getElementById("sessions").innerHTML =
+        localStorage.getItem("sessions") || 0;
+}
+
+loadStats();
+
+updateDisplay();
+
+</script>
+
+</body>
+</html>
