@@ -1,4 +1,4 @@
-from services.gemini_service import generate_plan
+from services.ai_service import generate_plan
 from database.mongodb import plans_collection
 import datetime
 

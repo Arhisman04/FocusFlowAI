@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>FocusFlowAI Chat</title>
 
@@ -8,29 +12,464 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            background:#050816;
+            color:white;
+            font-family:system-ui,sans-serif;
+            overflow:hidden;
+        }
+
+        /* BACKGROUND */
+        .bg{
+            position:fixed;
+            inset:0;
+            overflow:hidden;
+            z-index:-1;
+        }
+
+        .blob{
+            position:absolute;
+            width:450px;
+            height:450px;
+            border-radius:50%;
+            filter:blur(120px);
+            opacity:0.25;
+        }
+
+        .blob1{
+            background:#38bdf8;
+            top:-150px;
+            left:-120px;
+        }
+
+        .blob2{
+            background:#8b5cf6;
+            bottom:-180px;
+            right:-120px;
+        }
+
+        /* MAIN */
+        .chat-wrapper{
+            width:100%;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+        }
+
+        .chat-container{
+            width:100%;
+            max-width:1100px;
+            height:95vh;
+
+            background:rgba(255,255,255,0.04);
+            border:1px solid rgba(255,255,255,0.08);
+
+            backdrop-filter:blur(20px);
+
+            border-radius:28px;
+
+            overflow:hidden;
+
+            display:flex;
+            flex-direction:column;
+
+            box-shadow:
+            0 10px 40px rgba(0,0,0,0.45),
+            0 0 80px rgba(56,189,248,0.08);
+        }
+
+        /* TOP BAR */
+        .top-bar{
+            padding:22px 28px;
+
+            border-bottom:1px solid rgba(255,255,255,0.08);
+
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+
+            background:rgba(255,255,255,0.03);
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+
+        .logo{
+            width:52px;
+            height:52px;
+
+            border-radius:18px;
+
+            background:linear-gradient(
+                135deg,
+                #38bdf8,
+                #8b5cf6
+            );
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+
+            font-size:24px;
+
+            box-shadow:
+            0 0 25px rgba(56,189,248,0.4);
+        }
+
+        .title h1{
+            font-size:22px;
+            font-weight:700;
+        }
+
+        .title p{
+            color:#94a3b8;
+            margin-top:3px;
+            font-size:14px;
+        }
+
+        .status{
+            padding:10px 16px;
+            border-radius:999px;
+
+            background:rgba(34,197,94,0.12);
+
+            color:#4ade80;
+
+            font-size:13px;
+            font-weight:600;
+
+            border:1px solid rgba(74,222,128,0.25);
+        }
+
+        /* CHAT */
+        #chat-box{
+            flex:1;
+            overflow-y:auto;
+
+            padding:28px;
+
+            display:flex;
+            flex-direction:column;
+            gap:20px;
+
+            scroll-behavior:smooth;
+        }
+
+        #chat-box::-webkit-scrollbar{
+            width:8px;
+        }
+
+        #chat-box::-webkit-scrollbar-thumb{
+            background:rgba(255,255,255,0.12);
+            border-radius:10px;
+        }
+
+        /* USER */
+        .user-message{
+            align-self:flex-end;
+
+            max-width:75%;
+
+            padding:16px 20px;
+
+            background:linear-gradient(
+                135deg,
+                #2563eb,
+                #38bdf8
+            );
+
+            border-radius:22px 22px 6px 22px;
+
+            line-height:1.7;
+
+            box-shadow:
+            0 6px 25px rgba(56,189,248,0.25);
+
+            animation:fadeUp .25s ease;
+        }
+
+        /* AI */
+        .ai-message{
+            align-self:flex-start;
+
+            max-width:80%;
+
+            padding:20px 22px;
+
+            background:rgba(255,255,255,0.05);
+
+            border:1px solid rgba(255,255,255,0.08);
+
+            border-radius:22px 22px 22px 6px;
+
+            line-height:1.8;
+
+            color:#e5e7eb;
+
+            backdrop-filter:blur(10px);
+
+            animation:fadeUp .25s ease;
+        }
+
+        .ai-message p{
+            margin-bottom:12px;
+        }
+
+        .ai-message strong{
+            color:#38bdf8;
+        }
+
+        .ai-message ul{
+            padding-left:20px;
+            margin-top:8px;
+        }
+
+        .ai-message code{
+            background:#111827;
+            padding:3px 6px;
+            border-radius:6px;
+            color:#38bdf8;
+        }
+
+        /* THINKING */
+        .thinking{
+            display:flex;
+            align-items:center;
+            gap:10px;
+
+            color:#94a3b8;
+        }
+
+        .thinking::before{
+            content:"";
+            width:10px;
+            height:10px;
+
+            border-radius:50%;
+
+            background:#38bdf8;
+
+            animation:pulse 1s infinite;
+        }
+
+        /* INPUT */
+        .input-area{
+            padding:22px;
+
+            border-top:1px solid rgba(255,255,255,0.08);
+
+            background:rgba(255,255,255,0.03);
+
+            display:flex;
+            gap:14px;
+            align-items:flex-end;
+        }
+
+        textarea{
+            flex:1;
+
+            min-height:65px;
+            max-height:180px;
+
+            resize:none;
+
+            border:none;
+            outline:none;
+
+            padding:18px;
+
+            border-radius:18px;
+
+            background:rgba(255,255,255,0.06);
+
+            color:white;
+
+            font-size:15px;
+
+            line-height:1.6;
+
+            border:1px solid rgba(255,255,255,0.08);
+        }
+
+        textarea::placeholder{
+            color:#94a3b8;
+        }
+
+        button{
+            border:none;
+            outline:none;
+
+            padding:16px 24px;
+
+            border-radius:18px;
+
+            background:linear-gradient(
+                135deg,
+                #38bdf8,
+                #8b5cf6
+            );
+
+            color:white;
+
+            font-size:15px;
+            font-weight:700;
+
+            cursor:pointer;
+
+            transition:0.25s;
+
+            box-shadow:
+            0 6px 20px rgba(56,189,248,0.25);
+        }
+
+        button:hover{
+            transform:translateY(-2px) scale(1.02);
+
+            box-shadow:
+            0 10px 28px rgba(56,189,248,0.35);
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeUp{
+            from{
+                opacity:0;
+                transform:translateY(12px);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+
+        @keyframes pulse{
+            0%{
+                opacity:0.4;
+                transform:scale(1);
+            }
+            50%{
+                opacity:1;
+                transform:scale(1.3);
+            }
+            100%{
+                opacity:0.4;
+                transform:scale(1);
+            }
+        }
+
+        /* MOBILE */
+        @media(max-width:768px){
+
+            .chat-wrapper{
+                padding:0;
+            }
+
+            .chat-container{
+                height:100vh;
+                border-radius:0;
+            }
+
+            .user-message,
+            .ai-message{
+                max-width:92%;
+            }
+
+            .top-bar{
+                padding:18px;
+            }
+
+            .input-area{
+                padding:16px;
+            }
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-<div class="chat-container">
+<!-- BACKGROUND -->
+<div class="bg">
 
-    <div class="top-bar">
-        <h1>🧠 FocusFlowAI</h1>
-        <p>AI Academic Mentor</p>
-    </div>
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
 
-    <div id="chat-box"></div>
+</div>
 
-    <div class="input-area">
+<!-- CHAT -->
+<div class="chat-wrapper">
 
-        <textarea
-            id="message"
-            placeholder="Ask FocusFlowAI anything..."
-        ></textarea>
+    <div class="chat-container">
 
-        <button onclick="sendMessage()">
-            Send 🚀
-        </button>
+        <!-- TOP -->
+        <div class="top-bar">
+
+            <div class="brand">
+
+                <div class="logo">🧠</div>
+
+                <div class="title">
+                    <h1>FocusFlowAI</h1>
+                    <p>Elite Academic Recovery Assistant</p>
+                </div>
+
+            </div>
+
+            <div class="status">
+                ● AI Online
+            </div>
+
+        </div>
+
+        <!-- CHAT BOX -->
+        <div id="chat-box">
+
+            <div class="ai-message">
+
+                <strong>Welcome to FocusFlowAI 🚀</strong>
+
+                <p>
+                    I can help you with:
+                </p>
+
+                <ul>
+                    <li>Study plans</li>
+                    <li>Burnout recovery</li>
+                    <li>Exam strategy</li>
+                    <li>Focus improvement</li>
+                    <li>Productivity systems</li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <!-- INPUT -->
+        <div class="input-area">
+
+            <textarea
+                id="message"
+                placeholder="Ask anything about studying, focus, exams, productivity..."
+            ></textarea>
+
+            <button onclick="sendMessage()">
+                Send 🚀
+            </button>
+
+        </div>
 
     </div>
 
@@ -38,31 +477,52 @@
 
 <script>
 
+const textarea = document.getElementById("message");
+
+/* AUTO RESIZE */
+textarea.addEventListener("input", () => {
+
+    textarea.style.height = "auto";
+
+    textarea.style.height =
+        textarea.scrollHeight + "px";
+});
+
+/* ENTER SEND */
+textarea.addEventListener("keydown", (e) => {
+
+    if (e.key === "Enter" && !e.shiftKey) {
+
+        e.preventDefault();
+
+        sendMessage();
+    }
+});
+
+/* SEND */
 async function sendMessage() {
 
     const msgBox = document.getElementById("message");
     const chatBox = document.getElementById("chat-box");
 
-    const message = msgBox.value;
+    const message = msgBox.value.trim();
 
-    if (!message.trim()) return;
+    if (!message) return;
 
-    // USER MESSAGE
-
+    /* USER MESSAGE */
     chatBox.innerHTML += `
         <div class="user-message">
             ${message}
         </div>
     `;
 
-    // LOADING
-
+    /* LOADING */
     const loadingId = "loading-" + Date.now();
 
     chatBox.innerHTML += `
         <div class="ai-message" id="${loadingId}">
             <span class="thinking">
-                FocusFlowAI is thinking...
+                FocusFlowAI is analyzing your situation...
             </span>
         </div>
     `;
@@ -70,58 +530,70 @@ async function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     msgBox.value = "";
+    msgBox.style.height = "65px";
 
-    // SEND REQUEST
+    try {
 
-    const response = await fetch("/chat", {
+        const response = await fetch("/chat", {
 
-        method: "POST",
+            method: "POST",
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-        body: JSON.stringify({
-            message: message
-        })
+            body: JSON.stringify({
+                message: message
+            })
 
-    });
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    // REMOVE LOADING
+        /* REMOVE LOADING */
+        document.getElementById(loadingId).remove();
 
-    document.getElementById(loadingId).remove();
+        /* AI MESSAGE */
+        const aiDiv = document.createElement("div");
 
-    // AI RESPONSE
+        aiDiv.className = "ai-message";
 
-    const aiDiv = document.createElement("div");
+        chatBox.appendChild(aiDiv);
 
-    aiDiv.className = "ai-message";
+        /* TYPE EFFECT */
+        let text = data.response || "No response generated.";
+        let i = 0;
 
-    chatBox.appendChild(aiDiv);
+        function typeEffect() {
 
-    // TYPING EFFECT
+            if (i <= text.length) {
 
-    let text = data.response;
-    let i = 0;
+                aiDiv.innerHTML =
+                    marked.parse(text.substring(0, i));
 
-    function typeEffect() {
+                i++;
 
-        if (i < text.length) {
+                chatBox.scrollTop =
+                    chatBox.scrollHeight;
 
-            aiDiv.innerHTML =
-                marked.parse(text.substring(0, i));
-
-            i++;
-
-            setTimeout(typeEffect, 10);
-
-            chatBox.scrollTop = chatBox.scrollHeight;
+                setTimeout(typeEffect, 8);
+            }
         }
+
+        typeEffect();
+
+    } catch (err) {
+
+        document.getElementById(loadingId).remove();
+
+        chatBox.innerHTML += `
+            <div class="ai-message">
+                ⚠ Error connecting to AI server.
+            </div>
+        `;
     }
 
-    typeEffect();
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 </script>
