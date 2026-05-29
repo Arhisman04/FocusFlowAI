@@ -1,3 +1,4 @@
+from services.agent_router import route_agent
 from services.coach_engine import generate_coach_message
 from services.intelligence_layer import build_ai_brain
 from services.persona_engine import detect_persona
@@ -81,6 +82,15 @@ def login_page():
 @app.route("/signup")
 def signup_page():
     return render_template("signup.html")
+@app.route("/chat")
+def chat_page():
+    return render_template("chat.html")
+
+
+    if "user" not in session:
+        return redirect("/login-page")
+
+    return render_template("dashboard.html")
 @app.route("/logout")
 def logout():
 
@@ -201,19 +211,27 @@ def dashboard():
         coach_message=coach_message
 
     )
-# =========================
-# 💬 AI CHAT (AGENT CORE)
-# =========================
 @app.route("/chat", methods=["POST"])
 def chat():
 
+    # =========================
+    # AUTH CHECK
+    # =========================
     if "user" not in session:
-        return jsonify({
-            "error": "Unauthorized"
-        }), 401
+        return jsonify({"error": "Unauthorized"}), 401
 
-    msg = request.json.get("message", "")
+    # =========================
+    # SAFE JSON PARSING (FIXED)
+    # =========================
+    data = request.get_json(silent=True) or {}
+    msg = data.get("message", "").strip()
 
+    if not msg:
+        return jsonify({"error": "Empty message"}), 400
+
+    # =========================
+    # LOAD MEMORY
+    # =========================
     memories = list(
         memory_collection.find(
             {"user": session["user"]},
@@ -235,22 +253,44 @@ Student Message:
 Reply intelligently using memory context.
 """
 
-    reply = ask_ai(prompt, mode="chat")
+    # =========================
+    # ROUTER
+    # =========================
+    agent_mode = route_agent(msg)
 
-    compressed_memory = {
-        "message": msg,
-        "reply": reply[:300]
-    }
+    if agent_mode not in ["chat", "plan"]:
+        agent_mode = "chat"
 
+    # =========================
+    # AI CALL
+    # =========================
+    try:
+        reply = ask_ai(prompt, mode=agent_mode)
+    except Exception as e:
+        return jsonify({
+            "error": "AI engine failed",
+            "details": str(e)
+        }), 500
+
+    # =========================
+    # SAVE MEMORY
+    # =========================
     memory_collection.insert_one({
         "user": session["user"],
-        "memory": compressed_memory,
+        "memory": {
+            "message": msg,
+            "reply": reply[:300]
+        },
         "date": str(datetime.date.today())
     })
 
+    # =========================
+    # RESPONSE
+    # =========================
     return jsonify({
         "response": reply
     })
+
 @app.route("/save-memory", methods=["POST"])
 def save_memory():
 
@@ -324,9 +364,9 @@ Student Input:
 
 Recovery Metrics:
 - Recovery Score: {metrics['recovery_score']}
-- Burnout: {metrics['burnout']}
-- Momentum: {metrics['momentum']}
-- Confidence Trend: {metrics['confidence_trend']}
+- Burnout: {metrics['burnout_risk']}
+- Momentum: {metrics['momentum_status']}
+
 
 AI Brain State:
 {brain}
@@ -734,7 +774,11 @@ def analytics():
         "level": level,
         "completed_tasks": completed
     })
+print(app.url_map)
+@app.route("/timer")
+def timer():
 
+    return render_template("timer.html")
 # =========================
 # 🚀 RUN SERVER
 # =========================

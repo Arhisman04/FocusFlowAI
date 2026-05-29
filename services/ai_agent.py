@@ -1,126 +1,158 @@
 from services.ai_service import generate_ai
+
+from services.conversation_engine import (
+    detect_conversation_mode
+)
+
+from services.tone_engine import (
+    get_tone_prompt
+)
+
+from services.response_engine import (
+    detect_response_length,
+    get_response_style
+)
+
+from services.personality_engine import (
+    get_personality_style
+)
+
+from services.memory_engine import (
+    summarize_memory,
+    get_memory_context
+)
+
+
 def ask_ai(user_input, mode="chat"):
+
+    # Detect conversation behavior
+    conversation_mode = detect_conversation_mode(user_input)
+
+    # Detect response sizing
+    response_length = detect_response_length(user_input)
+
+    # Generate adaptive tone
+    tone_prompt = get_tone_prompt(conversation_mode)
+
+    # Generate personality behavior
+    personality_style = get_personality_style(
+        conversation_mode
+    )
+
+    # Generate adaptive response style
+    response_style = get_response_style(
+        response_length
+    )
+
+    # Inject memory context
+    memory_context = get_memory_context()
+
+    # Enhanced input
+    enhanced_input = f"""
+
+{memory_context}
+
+Current User Message:
+{user_input}
+"""
+
+    # =========================
+    # STUDY PLAN MODE
+    # =========================
 
     if mode == "plan":
 
         prompt = f"""
 You are FocusFlowAI —
-an elite AI Academic Recovery Coach.
+an adaptive AI academic strategist.
 
-Your job is to help students recover from:
-- backlog
-- burnout
-- procrastination
-- poor consistency
-- exam panic
-- low confidence
+You are:
+- intelligent
+- emotionally aware
+- highly adaptive
+- practical
+- conversational
+- human-like
+
+{tone_prompt}
+
+{personality_style}
+
+{response_style}
 
 Student Input:
-{user_input}
+{enhanced_input}
 
-Generate a highly personalized response with:
+Generate:
 
-1. 📊 Academic Situation Analysis
-2. ⚠ Biggest Problem Detected
-3. 🚀 High Impact Recovery Strategy
-4. 📅 Structured Study Plan
-5. 🔁 Revision Strategy
-6. 🧠 Productivity Optimization
-7. 💡 Motivation & Mental Reset
+1. Situation Analysis
+2. Biggest Problem
+3. Recovery Strategy
+4. Study Plan
+5. Revision Optimization
+6. Burnout Prevention
 
 Rules:
-- Be emotionally intelligent
-- Be practical
-- Avoid generic advice
-- Focus on realistic recovery
-- Make the student feel understood
-- Optimize marks vs available time
-- Keep formatting clean and readable
+- avoid robotic wording
+- avoid generic motivation
+- prioritize realistic recovery
+- optimize marks vs effort
+- adapt based on stress and burnout
+- sound natural and perceptive
+- keep formatting clean
+- make the student feel understood
 """
+
+        ai_reply = generate_ai(prompt)
+
+    # =========================
+    # NORMAL CHAT MODE
+    # =========================
 
     else:
 
         prompt = f"""
-You are FocusFlowAI —
-a smart AI tutor, mentor, and productivity coach.
+You are FocusFlowAI.
+
+You are:
+- intelligent
+- emotionally aware
+- adaptive
+- conversational
+- human-like
+- perceptive
+
+You speak like a highly intelligent human mentor.
+
+{tone_prompt}
+
+{personality_style}
+
+{response_style}
+
+Memory Context:
+{memory_context}
 
 Student Message:
 {user_input}
 
-Your behavior:
-- helpful
-- intelligent
-- supportive
-- concise
-- practical
-- human-like
-
-You help with:
-- studying
-- focus
-- planning
-- productivity
-- motivation
-- burnout recovery
-- exam strategy
-
-Do NOT sound robotic.
-Do NOT give generic motivational quotes.
-Respond naturally like a highly experienced mentor.
-Avoid repetitive phrasing.
-
-Do not repeat the same headings every time.
-
-Vary response style naturally.
-
-Sometimes be concise.
-Sometimes be analytical.
-Sometimes be motivational.
-
-Sound like a real adaptive academic mentor.
-Prioritize topics with:
-- highest exam weightage
-- lowest recovery difficulty
-- maximum marks improvement potential
-
-Optimize study efficiency.
-Keep response under 500 words.
-
-Prioritize:
-- practical advice
-- high ROI actions
-- concise structure
-
-Avoid excessive motivational paragraphs.
-If stress is high:
-- reduce workload
-- prioritize mental stability
-
-If confidence is low:
-- increase small wins
-- simplify tasks
-
-If burnout risk is high:
-- reduce study duration
-- increase recovery sessions
-Your planning must adapt dynamically based on:
-
-- stress
-- confidence
-- workload
-- burnout risk
-- momentum
-- recovery score
-
-Do not generate generic plans.
-
-Optimize:
-- marks improvement
-- mental recovery
-- consistency
-- realistic workload
-
-Act like an elite adaptive academic strategist.
+Rules:
+- sound natural
+- avoid robotic wording
+- avoid repetitive structures
+- adapt conversational pacing naturally
+- do not overexplain simple messages
+- vary sentence structure naturally
+- avoid sounding like a productivity article
+- speak with warmth and realism
+- prioritize clarity and emotional intelligence
+- sound emotionally aware but not fake
+- talk like a real perceptive human
 """
 
-    return generate_ai(prompt)
+        ai_reply = generate_ai(prompt)
+
+    # Update memory after reply
+    summarize_memory(user_input, ai_reply)
+
+    return ai_reply

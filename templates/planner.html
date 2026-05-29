@@ -318,7 +318,10 @@ ${document.getElementById("details").value}
 
     .then(data => {
 
-        output.innerHTML = data.plan;
+output.innerHTML = data.plan
+    .replace(/\n/g, "<br>")
+    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+    .replace(/- /g, "• ");
 
     })
 

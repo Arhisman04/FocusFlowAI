@@ -2,6 +2,10 @@ import os
 import sqlite3
 from dotenv import load_dotenv
 from services.ai_service import generate_ai
+from services.memory_engine import (
+    summarize_memory,
+    get_memory_context
+)
 
 # ---------------- LOAD ENV ----------------
 load_dotenv()
@@ -455,10 +459,26 @@ BAD:
 # ---------------- MAIN ASK FUNCTION ----------------
 def ask_ai(user_input, mode="chat"):
 
+    # Get memory context
+    memory_context = get_memory_context()
+
+    # Combine memory + user input
+    enhanced_input = f"""
+{memory_context}
+
+Current User Message:
+{user_input}
+"""
+
     if mode == "plan":
 
-        return generate_study_plan(user_input)
+        ai_reply = generate_study_plan(enhanced_input)
 
     else:
 
-        return chat_with_ai(user_input)
+        ai_reply = chat_with_ai(enhanced_input)
+
+    # Update memory after response
+    summarize_memory(user_input, ai_reply)
+
+    return ai_reply

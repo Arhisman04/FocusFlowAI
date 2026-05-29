@@ -29,7 +29,7 @@ def build_ai_brain(
         stress=stress,
         confidence=confidence,
         consistency=consistency,
-        backlog=backlog
+        backlog=backlog   
     )
 
     recovery_score = recovery["recovery_score"]
