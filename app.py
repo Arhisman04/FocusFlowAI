@@ -1,3 +1,5 @@
+import email
+
 from services.agent_router import route_agent
 from services.coach_engine import generate_coach_message
 from services.intelligence_layer import build_ai_brain
@@ -10,7 +12,6 @@ from flask import Flask, render_template, request, jsonify, session, redirect
 
 import datetime
 import bcrypt
-
 from flask_jwt_extended import JWTManager
 
 from services.ai_agent import ask_ai
@@ -53,20 +54,35 @@ def register():
 def login():
 
     data = request.json
-    email = data["email"]
-    password = data["password"]
 
-    user = users_collection.find_one({"email": email})
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Missing fields"}), 400
+
+    user = users_collection.find_one({"email": email.strip().lower()})
+
+    print("DEBUG USER:", user)
 
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    if not bcrypt.checkpw(password.encode("utf-8"), user["password_hash"]):
+    stored_password = user["password_hash"]
+
+    print("STORED PASSWORD:", stored_password)
+
+    if not bcrypt.checkpw(password.encode("utf-8"), stored_password):
         return jsonify({"error": "Wrong password"}), 401
+
     session["user"] = email
 
     return jsonify({
         "status": "success",
+        "message": "Login successful"
     })
 # =========================
 # 🏠 LANDING PAGE
@@ -321,39 +337,32 @@ def planner():
 def generate_plan():
 
     data = request.get_json()
-
     user_input = data.get("input", "")
 
     if not user_input:
-
         return jsonify({
             "status": "error",
             "plan": "No input provided"
         })
 
     metrics = calculate_recovery_metrics(
-
         study_hours=3,
         stress=8,
         confidence=3,
         consistency=4,
         backlog="High"
-
     )
 
     brain = build_ai_brain(
-
         study_hours=3,
         stress=8,
         confidence=3,
         consistency=4,
         backlog="High",
         score_history=[45, 52, 61]
-
     )
 
     enhanced_prompt = f"""
-
 You are FocusFlowAI,
 an elite AI Academic Recovery Coach.
 
@@ -366,7 +375,6 @@ Recovery Metrics:
 - Recovery Score: {metrics['recovery_score']}
 - Burnout: {metrics['burnout_risk']}
 - Momentum: {metrics['momentum_status']}
-
 
 AI Brain State:
 {brain}
@@ -383,43 +391,31 @@ Generate:
 8. 🧠 Productivity Advice
 9. 💡 Motivation Guidance
 
-Your response must:
-- feel highly personalized
-- be emotionally intelligent
-- avoid generic advice
-- prioritize realistic recovery
-- optimize marks vs time
-
-Keep formatting clean and visually readable.
-
+Keep formatting clean, structured, and readable.
 """
 
-    plan = ask_ai(
-        enhanced_prompt,
-        mode="plan"
-    )
+    try:
+        plan = ask_ai(enhanced_prompt, mode="plan")
 
-    plans_collection.insert_one({
+        plans_collection.insert_one({
+            "user": session["user"],
+            "type": "auto",
+            "plan": plan,
+            "date": str(datetime.date.today())
+        })
 
-        "user": session["user"],
+        return jsonify({
+            "status": "success",
+            "plan": plan,
+            "metrics": metrics
+        })
 
-        "type": "auto",
-
-        "plan": plan,
-
-        "date": str(datetime.date.today())
-
-    })
-
-    return jsonify({
-
-        "status": "success",
-
-        "plan": plan,
-
-        "metrics": metrics
-
-    })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "plan": "⚠ AI is temporarily busy. Please try again.",
+            "error": str(e)
+        })
 
 # =========================
 # ⚡ AUTO DAILY PLAN

@@ -426,15 +426,27 @@ canvas {
 <div class="hero">
 
     <div>
-        <h1>Welcome back 🚀</h1>
-        <p style="color:#9ca3af;">
-            Your AI academic OS • <span style="color:#38bdf8;">Active Session</span>
+
+        <h1 id="greeting">
+            Welcome back 🚀
+        </h1>
+
+        <p id="aiGreeting" style="color:#9ca3af;">
+            🧠 Analyzing your academic momentum...
         </p>
+
     </div>
 
     <div>
-        <h2 style="color:#38bdf8">{{ score }}</h2>
-        <p style="color:#9ca3af;">Focus Score</p>
+
+        <h2 style="color:#38bdf8">
+            {{ score }}
+        </h2>
+
+        <p style="color:#9ca3af;">
+            Focus Score
+        </p>
+
     </div>
 
 </div>
@@ -591,7 +603,71 @@ fetch("/api/sessions")
     });
 
 });
+// AI Greeting System
 
+const hour = new Date().getHours();
+
+let greeting = "";
+
+if(hour < 12){
+
+    greeting = "Good morning ☀";
+
+}
+else if(hour < 18){
+
+    greeting = "Good afternoon 🌤";
+
+}
+else{
+
+    greeting = "Good evening 🌙";
+
+}
+
+document.getElementById("greeting").innerText = greeting;
+
+
+// AI Insight Message
+
+const streak =
+    Number(localStorage.getItem("streak") || 0);
+
+const xp =
+    Number(localStorage.getItem("xp") || 0);
+
+const sessions =
+    Number(localStorage.getItem("sessions") || 0);
+
+let insight = "";
+
+if(streak >= 7){
+
+    insight =
+    "🔥 Outstanding consistency detected. Momentum is building rapidly.";
+
+}
+else if(sessions >= 20){
+
+    insight =
+    "📚 Strong study volume detected. Prioritize revision today.";
+
+}
+else if(xp >= 500){
+
+    insight =
+    "🚀 Productivity growth is trending upward. Keep pushing.";
+
+}
+else{
+
+    insight =
+    "🧠 One focused session today can create significant progress.";
+
+}
+
+document.getElementById("aiGreeting").innerText =
+insight;
 </script>
 
 </body>
