@@ -77,6 +77,61 @@ Adapt response length naturally.
 
 Do not force long answers.
 Keep pacing human-like.
+IMPORTANT:
+
+When writing mathematics:
+
+Always use LaTeX.
+
+Wrap all equations inside $$ $$
+
+Examples:
+
+$$
+\int x dx = \frac{x^2}{2}+C
+$$
+
+$$
+\frac{d}{dx}(x^3)=3x^2
+$$
+
+$$
+a^2+b^2=c^2
+$$
+
+Never use:
+
+[ equation ]
+
+Never use:
+
+( equation )
+
+Always use proper LaTeX between $$ symbols.
+Mathematical expressions must be displayed in LaTeX.
+
+Every formula, derivation, fraction, matrix, integral, derivative and equation should be wrapped inside $$ $$.
+
+Show derivations.
+
+Verify calculations before answering.
+
+For JEE-level questions:
+- identify concepts
+- derive equations
+- solve systematically
+- check final answer
+For mathematics, physics and chemistry:
+
+Always write formulas using LaTeX.
+
+Example:
+
+$$
+\int x\,dx=\frac{x^2}{2}+C
+$$
+
+Use $$ $$ for display equations.
 """
     }
 

@@ -4,29 +4,13 @@
 
 function typeEffect(element, html, speed = 5) {
 
-    element.innerHTML = "";
+    element.innerHTML = html;
 
-    let temp = document.createElement("div");
+    if (window.MathJax) {
 
-    temp.innerHTML = html;
+        MathJax.typesetPromise([element]);
 
-    let text = temp.innerHTML;
-
-    let i = 0;
-
-    function typing() {
-
-        if (i < text.length) {
-
-            element.innerHTML = text.substring(0, i);
-
-            i++;
-
-            setTimeout(typing, speed);
-        }
     }
-
-    typing();
 }
 
 

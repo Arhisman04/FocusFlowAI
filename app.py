@@ -1,5 +1,3 @@
-import email
-
 from services.agent_router import route_agent
 from services.coach_engine import generate_coach_message
 from services.intelligence_layer import build_ai_brain
@@ -100,13 +98,11 @@ def signup_page():
     return render_template("signup.html")
 @app.route("/chat")
 def chat_page():
-    return render_template("chat.html")
-
 
     if "user" not in session:
         return redirect("/login-page")
 
-    return render_template("dashboard.html")
+    return render_template("chat.html")
 @app.route("/logout")
 def logout():
 
@@ -374,22 +370,80 @@ Student Input:
 Recovery Metrics:
 - Recovery Score: {metrics['recovery_score']}
 - Burnout: {metrics['burnout_risk']}
-- Momentum: {metrics['momentum_status']}
+- Evolution State: {brain['evolution_state']}
 
-AI Brain State:
-{brain}
+AAI Brain State:
 
-Generate:
+Persona:
+{brain['persona']}
 
-1. 📊 Recovery Analysis
-2. 🎯 Readiness Score (0-100)
-3. ⚠ Burnout Risk
-4. 📚 Weakness Detection
-5. 🚀 High ROI Topics
-6. ⏰ Daily Study Strategy
-7. 🔁 Revision Plan
-8. 🧠 Productivity Advice
-9. 💡 Motivation Guidance
+Recovery Score:
+{brain['recovery_score']}
+
+Burnout Risk:
+{brain['burnout_risk']}
+
+Evolution State:
+{brain['evolution_state']}
+
+Insight:
+{brain['insight']}
+Your goal is to act as an autonomous academic operating system.
+
+Do not behave like a normal chatbot.
+
+Think like:
+- Academic Strategist
+- Productivity Coach
+- Burnout Specialist
+- Exam Mentor
+
+Use the AI Brain data to personalize every recommendation.
+Generate a COMPLETE ACADEMIC RECOVERY REPORT.
+
+Output Format:
+
+# 📊 Academic Recovery Analysis
+Explain the student's current situation.
+
+# 🎯 Readiness Score
+Give a score from 0-100 and explain why.
+
+# ⚠ Burnout Analysis
+Explain current burnout risk and recovery actions.
+
+# 🧠 Student Persona
+Explain detected persona:
+{brain['persona']}
+
+# 📚 Weakness Detection
+Identify likely weak areas.
+
+# 🚀 High ROI Topics
+List the most important topics to study first.
+
+# ⏰ Optimized Daily Study Plan
+Create a detailed hour-by-hour study schedule.
+
+# 🔁 Smart Revision Strategy
+Create a revision cycle.
+
+# 📈 Performance Forecast
+Predict expected improvement if the plan is followed.
+
+# 🤖 AI Coach Recommendation
+Provide personalized coaching advice.
+
+# 🎯 Next Best Action
+Give ONE immediate action the student should do today.
+
+Rules:
+- Be highly specific.
+- Never give generic advice.
+- Use bullet points.
+- Adapt to the student's persona, recovery score and burnout risk.
+- Think like an elite academic strategist.
+- Sound professional and intelligent.
 
 Keep formatting clean, structured, and readable.
 """

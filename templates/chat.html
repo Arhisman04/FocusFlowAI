@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -11,7 +11,31 @@
     <link rel="stylesheet" href="/static/chat.css">
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        if(window.MathJax)
+    {
+        MathJax.typesetPromise([aiDiv])
+    }
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
 
+<script
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
 
         *{
@@ -396,7 +420,16 @@
         }
 
     </style>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+  }
+};
+</script>
 
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
 <body>
@@ -564,21 +597,25 @@ async function sendMessage() {
         let text = data.response || "No response generated.";
         let i = 0;
 
-        function typeEffect() {
+function typeEffect() {
 
-            if (i <= text.length) {
+    if (i <= text.length) {
 
-                aiDiv.innerHTML =
-                    marked.parse(text.substring(0, i));
+        aiDiv.innerHTML =
+            marked.parse(text.substring(0, i));
 
-                i++;
-
-                chatBox.scrollTop =
-                    chatBox.scrollHeight;
-
-                setTimeout(typeEffect, 8);
-            }
+        if (window.MathJax) {
+            MathJax.typesetPromise([aiDiv]);
         }
+
+        i++;
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+
+        setTimeout(typeEffect, 20);
+    }
+}
 
         typeEffect();
 

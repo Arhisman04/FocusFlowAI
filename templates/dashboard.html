@@ -437,9 +437,13 @@ canvas {
         </p>
 
     </div>
-
+    <p style="color:#38bdf8; font-weight:500;">
+🧠 FocusFlowAI is actively monitoring your academic behavior in real time.
+</p>
 </div>
-
+<h3 style="text-align:center; margin-top:40px; color:#9ca3af;">
+FocusFlowAI is not a productivity tool — it is an adaptive academic intelligence system.
+</h3>
 <!-- KPI -->
 <div class="kpi-grid">
 
@@ -449,8 +453,6 @@ canvas {
     <div class="kpi"><h2>{{ level }}</h2><p>Level</p></div>
 
 </div>
-
-<!-- AI BRAIN -->
 <div class="panel ai-brain">
 
     <h3>🧠 AI Brain State</h3>
@@ -458,50 +460,83 @@ canvas {
     <div class="brain-grid">
 
         <div class="brain-card">
-            <h2>87%</h2>
+            <h2>{{ ai_brain.recovery_score }}%</h2>
             <p>Recovery Score</p>
         </div>
 
         <div class="brain-card">
-            <h2>Low</h2>
+            <h2>{{ ai_brain.burnout_risk }}</h2>
             <p>Burnout Risk</p>
         </div>
 
         <div class="brain-card">
-            <h2>INTJ</h2>
+            <h2>{{ ai_brain.persona }}</h2>
             <p>Student Persona</p>
         </div>
 
         <div class="brain-card">
-            <h2>↑</h2>
-            <p>Momentum Trend</p>
+            <h2>{{ ai_brain.evolution_state }}</h2>
+            <p>Evolution State</p>
         </div>
 
+    </div>
+</div>
+
+</div>
+<div style="
+margin-top:20px;
+padding:16px;
+border-radius:16px;
+background:rgba(56,189,248,0.08);
+border:1px solid rgba(56,189,248,0.2);
+">
+
+<h3>🤖 Autonomous AI Coach</h3>
+
+<p>{{ coach_message }}</p>
+
+</div>
     </div>
 
 </div>
 
 <!-- INSIGHT FEED (NEW SAAS FEATURE) -->
 <div class="panel">
+<div class="panel" style="border:1px solid #38bdf8;">
+    <h3>⚡ AI Prediction Engine</h3>
+    <p>
+        Based on your behavior, FocusFlowAI predicts your next performance trend:
+    </p>
 
+    <h2 style="color:#38bdf8;">
+        {{ ai_brain.evolution_state }}
+    </h2>
+</div>
     <h3>🤖 AI Insight Feed</h3>
 
     <div class="insight-feed">
 
-        <div class="insight-item">⚠ You are overloading Physics study sessions</div>
-        <div class="insight-item">📈 Consistency improving over last 3 days</div>
-        <div class="insight-item">🧠 Peak focus window detected: 7–9 PM</div>
+        <div class="insight-item">
+🧠 {{ ai_brain.insight }}
+</div>
+
+<div class="insight-item">
+🤖 {{ coach_message }}
+</div>
+
+<div class="insight-item">
+📈 {{ ai_brain.evolution_state }}
+</div>
 
     </div>
-
 </div>
 
 <!-- GRID PANELS -->
 <div class="grid">
 
 <div class="panel">
-    <h3>🤖 AI Insight</h3>
-    <div>{{ ai_insight }}</div>
+<h3>🤖 AI Insight</h3>
+<div>{{ ai_brain.insight }}</div>
 </div>
 
 <div class="panel">
@@ -512,7 +547,34 @@ canvas {
 </div>
 
 </div>
+<div class="panel">
 
+    <h3>🤖 AI Insight Feed</h3>
+
+    <div class="insight-feed">
+
+        <div class="insight-item">
+            🧠 {{ ai_brain.insight }}
+        </div>
+
+        <div class="insight-item">
+            🤖 {{ coach_message }}
+        </div>
+
+        <div class="insight-item">
+            📈 {{ ai_brain.evolution_state }}
+        </div>
+
+    </div>
+
+</div>
+<div class="ai-status-bar">
+
+    <span>🧠 AI Brain: Active</span>
+    <span>⚡ Adaptive Mode: ON</span>
+    <span>📊 Monitoring: Live</span>
+
+</div>
 <!-- CHART -->
 <div class="panel">
     <h3>📈 Study Trend</h3>
@@ -525,7 +587,29 @@ canvas {
 </div>
 
 </div>
+<div style="text-align:center; margin-top:40px; color:#64748b;">
+    FocusFlowAI continuously adapts to student behavior, burnout patterns, and learning performance.
+</div>
+<div class="panel">
 
+<h3>🧠 AI Prediction Engine</h3>
+
+<p>
+Exam Success Probability:
+<strong>{{ ai_brain.recovery_score }}%</strong>
+</p>
+
+<p>
+Current Persona:
+<strong>{{ ai_brain.persona }}</strong>
+</p>
+
+<p>
+AI Forecast:
+<strong>{{ ai_brain.evolution_state }}</strong>
+</p>
+
+</div>
 <!-- SCRIPT -->
 <script>
 
