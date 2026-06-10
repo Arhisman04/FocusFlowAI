@@ -178,19 +178,23 @@ Sessions • Tasks • Plans • Memory
 
 Dashboard
 
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/b20bdeda-a20e-4fd0-ae13-d69ee0284715" />
 
 
 AI Planner
 
-(Add Planner Screenshot Here)
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/1b1c3caa-16c9-43ba-be3c-cfdb2574b6cb" />
+
 
 Focus Timer
 
-(Add Timer Screenshot Here)
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/6f33f810-a78c-459a-847f-ed55b445292d" />
 
-Analytics Dashboard
 
-(Add Analytics Screenshot Here)
+Landing Analytics Dashboard
+
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/7872ccf4-bb26-4b3e-a328-b952f8664a15" />
+
 
 ---
 
