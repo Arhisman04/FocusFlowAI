@@ -818,27 +818,24 @@ async function completeSession(){
     xp += minutesFocused * 5;
     sessions++;
 
-    localStorage.setItem("streak", streak);
-    localStorage.setItem("xp", xp);
-    localStorage.setItem("sessions", sessions);
-
     document.getElementById("streak").innerHTML = streak;
     document.getElementById("xp").innerHTML = xp;
     document.getElementById("sessions").innerHTML = sessions;
 
-    await fetch("/add_session", {
+await fetch("/add_session", {
 
-        method:"POST",
+    method:"POST",
 
-        headers:{
-            "Content-Type":"application/json"
-        },
+    headers:{
+        "Content-Type":"application/json"
+    },
 
-        body:JSON.stringify({
-            duration: minutesFocused
-        })
+    body:JSON.stringify({
+        duration: minutesFocused,
+        xp: minutesFocused * 5
+    })
 
-    });
+});
 
     document.getElementById("aiBox").innerHTML = `
         🧠 AI Analysis:
@@ -892,7 +889,21 @@ function loadStats(){
         localStorage.getItem("sessions") || 0;
 }
 
-loadStats();
+async function loadStats(){
+
+    const res = await fetch("/analytics");
+
+    const data = await res.json();
+
+    document.getElementById("xp").innerHTML =
+        data.xp || 0;
+
+    document.getElementById("sessions").innerHTML =
+        data.sessions || 0;
+
+    document.getElementById("streak").innerHTML =
+        data.sessions || 0;
+}
 
 updateDisplay();
 

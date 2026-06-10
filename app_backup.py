@@ -9,9 +9,9 @@ from services.recovery_engine import calculate_recovery_metrics
 from flask import Flask, render_template, request, jsonify, session, redirect
 
 import datetime
-import bcrypt # type: ignore
+import bcrypt
 from flask_jwt_extended import JWTManager
- 
+
 from services.ai_agent import ask_ai
 
 from database.mongodb import (
@@ -123,9 +123,7 @@ def dashboard():
             {"user": session["user"]}
         )
     )
-    print("LOGGED USER =", session["user"])
-    print("TOTAL SESSIONS FOUND =", len(sessions))
-    print("SESSIONS =", sessions)
+
     tasks = list(
         tasks_collection.find(
             {"user": session["user"]},
@@ -142,15 +140,10 @@ def dashboard():
         int((total_time * 1.5) + (len(sessions) * 3))
     )
 
-    xp = sum(
-        s.get("xp", s["duration"] * 5)
-        for s in sessions
-    ) if sessions else 0
-    print("XP =", xp)
-    print("LEVEL =", (xp // 100) + 1)
-    print("TOTAL SESSIONS =", len(sessions))
+    xp = total_time * 5
 
     level = (xp // 100) + 1
+
     pending_tasks = len([
         t for t in tasks if not t["done"]
     ])
@@ -172,45 +165,32 @@ def dashboard():
         if total_time > 120
         else "Consistency is your biggest upgrade path 📈"
     )
-    print("DASHBOARD USER =", session.get("user"))
 
     # =========================
     # 🧠 AI BRAIN
     # =========================
+    ai_brain = build_ai_brain(
 
-    study_hours = total_time / 60
+        study_hours=3,
 
-    if total_time == 0:
+        stress=8,
 
-        ai_brain = {
-            "recovery_score": 0,
-            "burnout_risk": "Low 🟢",
-            "persona": "New Student 🚀",
-            "evolution_state": "Starting Journey 🚀",
-            "insight": "Complete your first session."
-        }
+        confidence=3,
 
-        coach_message = (
-            "Welcome to FocusFlowAI. "
-            "Complete your first focus session to start building your AI profile."
-        )
+        consistency=4,
 
-    else:
+        backlog="High",
 
-        ai_brain = build_ai_brain(
-            study_hours=study_hours,
-            stress=3,
-            confidence=5,
-            consistency=min(len(sessions), 10),
-            backlog="Medium",
-            score_history=[score]
-        )
+        score_history=[45, 52, 61]
 
-        coach_message = generate_coach_message(
-            ai_brain
-        )
+    )
 
-    print("SESSIONS =", sessions)
+    # =========================
+    # 🤖 AUTONOMOUS AI COACH
+    # =========================
+    coach_message = generate_coach_message(
+        ai_brain
+    )
 
     return render_template(
 
@@ -710,25 +690,13 @@ def insight():
 @app.route("/add_session", methods=["POST"])
 def add_session():
 
-    print("ADD SESSION CALLED")
+    duration = request.json.get("duration", 0)
 
-    data = request.get_json()
-
-    print("DATA =", data)
-
-    print("USER =", session.get("user"))
-
-    duration = data.get("duration", 0)
-    xp = data.get("xp", 0)
-
-    result = sessions_collection.insert_one({
-        "user": session.get("user"),
-        "date": str(datetime.date.today()),
-        "duration": duration,
-        "xp": xp
-    })
-
-    print("INSERTED =", result.inserted_id)
+    sessions_collection.insert_one({
+    "user": session["user"],
+    "date": str(datetime.date.today()),
+    "duration": duration
+})
 
     return jsonify({
         "status": "ok"
@@ -861,21 +829,6 @@ print(app.url_map)
 def timer():
 
     return render_template("timer.html")
-import os
-from urllib.parse import quote_plus
-from pymongo import MongoClient
-username = "archisman"
-password = quote_plus("rxFrYMQylJAqv22z")
-
-MONGO_URI = f"mongodb://{username}:{password}@ac-z3ralgu-shard-00-00.rfnktuo.mongodb.net:27017,ac-z3ralgu-shard-00-01.rfnktuo.mongodb.net:27017,ac-z3ralgu-shard-00-02.rfnktuo.mongodb.net:27017/?ssl=true&replicaSet=atlas-vaml3i-shard-0&authSource=admin&appName=FocusFlowCluster"
-
-client = MongoClient(MONGO_URI)
-db = client["FocusFlowAI"]
-users_collection = db["users"]
-sessions_collection = db["sessions"]
-plans_collection = db["plans"]
-tasks_collection = db["tasks"]
-memory_collection = db["memory"]
 # =========================
 # 🚀 RUN SERVER
 # =========================

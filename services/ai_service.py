@@ -1,38 +1,27 @@
 import os
-import requests
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.getenv("OPENROUTER_API_KEY")
-BASE_URL = "https://openrouter.ai/api/v1"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+genai.configure(api_key=GEMINI_API_KEY)
+
+model = genai.GenerativeModel(
+    "gemini-2.5-flash"
+)
 
 def generate_ai(prompt):
+
     try:
-        response = requests.post(
-            f"{BASE_URL}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": "openai/gpt-4o-mini",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are FocusFlowAI, an elite academic productivity assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-            },
-            timeout=30,
-        )
-        response.raise_for_status()
-        data = response.json()
-        return data["choices"][0]["message"]["content"]
+
+        response = model.generate_content(prompt)
+
+        return response.text
+
     except Exception as e:
-        return f"AI Error: {str(e)}"
+
+        print("Gemini Error:", str(e))
+
+        return f"⚠ AI Error: {str(e)}"
