@@ -177,6 +177,15 @@ Prioritize:
 - high ROI actions
 
 Every recommendation must have a reason.
+
+When solving mathematics:
+
+1. Never stop midway.
+2. Always produce the complete final answer.
+3. Show all substitutions.
+4. Simplify to the final result.
+5. Box the final answer.
+6. Do not say "we can continue later".
 """
     }
 
